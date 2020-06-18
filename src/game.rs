@@ -149,7 +149,7 @@ mod tests{
         let mut _game = Game::new_game();
         println!("Pre Update:");
         Game::print_board(&_game);
-        _game = Game::update_board(_game, 5, 5);
+        _game.update_board(5, 5);
         println!("Post Update:");
         Game::print_board(&_game);
         assert_eq!(_game.board[5][5], 1);
@@ -186,11 +186,11 @@ mod tests{
     #[test]
     fn check_board_won(){
         let mut _game = Game::new_game();
-        _game = Game::update_board(_game, 5, 5);
-        _game = Game::update_board(_game, 5, 4);
-        _game = Game::update_board(_game, 5, 3);
-        _game = Game::update_board(_game, 5, 2);
-        _game = Game::board_check(_game, 5, 2);
+        _game.update_board(5, 5);
+        _game.update_board(5, 4);
+        _game.update_board(5, 3);
+        _game.update_board(5, 2);
+        _game.board_check(5, 2);
         println!("Won Game:");
         Game::print_board(&_game);
         assert_eq!(_game.winner, 1);
@@ -198,10 +198,10 @@ mod tests{
     #[test]
     fn check_board_loop(){
         let mut _game = Game::new_game();
-        _game = Game::update_board(_game, 5, 4);
-        _game = Game::update_board(_game, 5, 3);
-        _game = Game::update_board(_game, 5, 2);
-        _game = Game::board_check(_game, 5, 2);
+        _game.update_board(5, 4);
+        _game.update_board(5, 3);
+        _game.update_board(5, 2);
+        _game.board_check(5, 2);
         println!("In Progress Game:");
         Game::print_board(&_game);
         assert_eq!(_game.winner, 0);
@@ -221,7 +221,7 @@ mod tests{
             }
             for col in 0..6{
                 _game.board[row][col] = test_player;
-                _game = Game::board_check(_game, row, col);
+                _game.board_check(row, col);
                 if test_player != 2{
                     test_player += 1;
                 } else{
