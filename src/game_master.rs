@@ -21,13 +21,12 @@ pub fn game_loop(game: &mut Game){
     while game.winner == 0{
         println!("It is player {}'s turn", game.current_player);
         let mut choice_num: usize = player::player_turn(game);
-        let mut y_position: usize = 0;
         while Game::valid_check(game, choice_num) == false{
             println!("Please enter a valid number");
             choice_num = player::player_turn(game);
         } 
         choice_num -= 1;
-        y_position = Game::find_placement(game, choice_num);
+        let y_position = Game::find_placement(game, choice_num);
 
         game.update_board(choice_num, y_position);
         game.board_check(choice_num, y_position);
@@ -49,7 +48,7 @@ pub fn game_loop(game: &mut Game){
     if game.winner == -1{
         println!("The game is a draw");
     } else{
-        println!("Player {} has one the game!", game.current_player);
+        println!("Player {} has won the game!", game.current_player);
     }
 }
 

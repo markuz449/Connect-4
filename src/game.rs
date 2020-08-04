@@ -45,12 +45,13 @@ impl Game{
         let mut diagCount1: i8 = 0;
         let mut diagCount2: i8 = 0;
         
-        horizCount = horizCount + Game::token_count(&self, player_choice, y_position, 1,  0,  0);
+        horizCount = horizCount + Game::token_count(&self, player_choice, y_position,  1,  0,  0);
         horizCount = horizCount + Game::token_count(&self, player_choice, y_position, -1,  0, -1);
         vertiCount = vertiCount + Game::token_count(&self, player_choice, y_position,  0,  1,  0);
         vertiCount = vertiCount + Game::token_count(&self, player_choice, y_position,  0, -1, -1);
         diagCount1 = diagCount1 + Game::token_count(&self, player_choice, y_position, -1,  1,  0);
         diagCount1 = diagCount1 + Game::token_count(&self, player_choice, y_position,  1, -1, -1);
+        diagCount2 = diagCount2 + Game::token_count(&self, player_choice, y_position,  1,  1,  0);
         diagCount2 = diagCount2 + Game::token_count(&self, player_choice, y_position, -1, -1, -1);
         
         // Checks to see if player has beaten the game
@@ -184,7 +185,7 @@ mod tests{
     }
 
     #[test]
-    fn check_board_won(){
+    fn check_board_won_vertical(){
         let mut _game = Game::new_game();
         _game.update_board(5, 5);
         _game.update_board(5, 4);
@@ -195,6 +196,46 @@ mod tests{
         Game::print_board(&_game);
         assert_eq!(_game.winner, 1);
     }
+
+    #[test]
+    fn check_board_won_horizontal(){
+        let mut _game = Game::new_game();
+        _game.update_board(1, 5);
+        _game.update_board(2, 5);
+        _game.update_board(3, 5);
+        _game.update_board(4, 5);
+        _game.board_check(4, 5);
+        println!("Won Game:");
+        Game::print_board(&_game);
+        assert_eq!(_game.winner, 1);
+    }
+
+    #[test]
+    fn check_board_won_diagonal(){
+        let mut _game = Game::new_game();
+        _game.update_board(5, 5);
+        _game.update_board(4, 4);
+        _game.update_board(3, 3);
+        _game.update_board(2, 2);
+        _game.board_check(2, 2);
+        println!("Won Game:");
+        Game::print_board(&_game);
+        assert_eq!(_game.winner, 1);
+    }
+
+    #[test]
+    fn check_board_won_diagonal_2_electric_boogaloo(){
+        let mut _game = Game::new_game();
+        _game.update_board(5, 2);
+        _game.update_board(4, 3);
+        _game.update_board(3, 4);
+        _game.update_board(2, 5);
+        _game.board_check(2, 5);
+        println!("Won Game:");
+        Game::print_board(&_game);
+        assert_eq!(_game.winner, 1);
+    }
+
     #[test]
     fn check_board_loop(){
         let mut _game = Game::new_game();
