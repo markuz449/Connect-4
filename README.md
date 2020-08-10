@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/markuz449/Connect-4">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="200" height="200">
   </a>
 
   <h3 align="center">Connect 4</h3>
