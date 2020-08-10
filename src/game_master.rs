@@ -1,11 +1,12 @@
-use crate::player;
 use crate::game::Game;
+use rand::Rng;
 
 // Starts the game of Connect 4
 pub fn start_game(){
     let mut game = Game::new_game();
 
-    let coin_flip = 1;
+    let mut rng = rand::thread_rng();
+    let coin_flip = rng.gen_range(1,3);
     
     println!("Game Start!");
     if coin_flip == 1{
@@ -21,16 +22,17 @@ pub fn game_loop(game: &mut Game){
     while game.winner == 0{
         println!("It is player {}'s turn", game.current_player);
         let mut choice_num;
+        let player_choice: fn(&Game) -> usize;
         if game.current_player == 1{
-            let player_choice = game.player1;
+            player_choice = game.player1;
             choice_num = player_choice(game);
         } else{
-            let player_choice = game.player2;
+            player_choice = game.player2;
             choice_num = player_choice(game);
         }
         while Game::valid_check(game, choice_num) == false{
             println!("Please enter a valid number");
-            choice_num = player::player_turn(game);
+            choice_num = player_choice(game);
         } 
         choice_num -= 1;
         let y_position = Game::find_placement(game, choice_num);
