@@ -20,7 +20,14 @@ pub fn start_game(){
 pub fn game_loop(game: &mut Game){
     while game.winner == 0{
         println!("It is player {}'s turn", game.current_player);
-        let mut choice_num: usize = player::player_turn(game);
+        let mut choice_num;
+        if game.current_player == 1{
+            let player_choice = game.player1;
+            choice_num = player_choice(game);
+        } else{
+            let player_choice = game.player2;
+            choice_num = player_choice(game);
+        }
         while Game::valid_check(game, choice_num) == false{
             println!("Please enter a valid number");
             choice_num = player::player_turn(game);

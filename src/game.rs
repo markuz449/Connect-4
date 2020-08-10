@@ -1,9 +1,12 @@
 use crate::game_master;
+use crate::player;
 
 pub struct Game{
     pub board: Vec<Vec<usize>>,
     pub winner: i8, // 0:Game not won, 1:Game Won Player 1, 2:Game Won Player 2, -1: Game Drawn 
-    pub current_player: usize
+    pub current_player: usize,
+    pub player1: fn(&Game) -> usize,
+    pub player2: fn(&Game) -> usize
 }
 
 impl Game{
@@ -12,7 +15,13 @@ impl Game{
         let board = vec![vec![0; 6]; 7];
         let winner: i8 = 0;
         let current_player: usize = 1;
-        let game = Game {board, winner, current_player};
+
+        /* Here you can set a refrence to whatever player class you want
+        *  Make sure that whatever function you set it returns a usize and takes an instance of game
+        */
+        let player1 = player::player_turn;
+        let player2 = player::player_turn;
+        let game = Game {board, winner, current_player, player1, player2};
         game
     }
 
