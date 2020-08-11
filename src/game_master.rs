@@ -8,7 +8,6 @@ pub fn start_game(){
     let mut rng = rand::thread_rng();
     let coin_flip = rng.gen_range(1,3);
     
-    println!("Game Start!");
     if coin_flip == 1{
         game.current_player = 1;
     } else{
@@ -20,7 +19,6 @@ pub fn start_game(){
 // The main game loop
 pub fn game_loop(game: &mut Game){
     while game.winner == 0{
-        println!("It is player {}'s turn", game.current_player);
         let mut choice_num;
         let player_choice: fn(&Game) -> usize;
         if game.current_player == 1{
@@ -31,7 +29,6 @@ pub fn game_loop(game: &mut Game){
             choice_num = player_choice(game);
         }
         while Game::valid_check(game, choice_num) == false{
-            println!("Please enter a valid number");
             choice_num = player_choice(game);
         } 
         choice_num -= 1;

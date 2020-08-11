@@ -6,8 +6,8 @@ pub fn player_turn(game: &Game) -> usize{
     let mut player_choice: usize = 0;
     
     game.print_board();
-    println!("=============");
-    println!("1 2 3 4 5 6 7");
+    println!("   =============");
+    println!("   1 2 3 4 5 6 7");
     println!("Press the number corresponding to the column to place your token");
     
     let mut input_text = String::new();
@@ -23,7 +23,5 @@ pub fn player_turn(game: &Game) -> usize{
 
 // Error code if the user enetered a value that is not valid
 fn error_choice(game: &Game){
-    println!("This is not a valid option");
-    println!("Please enter a valid option");
     player_turn(game);
 }

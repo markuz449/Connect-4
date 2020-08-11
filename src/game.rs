@@ -120,19 +120,32 @@ impl Game{
 
     // Prints out the current board of Connect 4
     pub fn print_board(&self){
-        println!("Current Board:");
+        print!("\x1bc");
+        println!("{}     {}", "\x1b[m", "Connect 4");
+        println!("\x1b[m");
+        if self.current_player == 1{
+            println!("   -> {}Player 1{}", "\x1b[1;31m", "\x1b[m");
+            println!("      {}Player 2{}", "\x1b[1;33m", "\x1b[m");
+        } else {
+            println!("      {}Player 1{}", "\x1b[1;31m", "\x1b[m");
+            println!("   -> {}Player 2{}", "\x1b[1;33m", "\x1b[m");
+        }
+        println!();
+        println!("   Current Board:");
         for y_print in 0..6{
+            print!("   ");
             for x_print in 0..7{
                 if self.board[x_print][y_print] == 1{
-                    print!("X ");
+                    print!("{}X ", "\x1b[1;31m");
                 } else if self.board[x_print][y_print] == 2{
-                    print!("O ");
+                    print!("{}O ", "\x1b[1;33m");
                 } else{
-                    print!("- ");
+                    print!("{}· ", "\x1b[m");
                 }
             }
             println!();
         }
+        print!("\x1b[m");
     }
 
     // Very important function, the most important in the entire program
