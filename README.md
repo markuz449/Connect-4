@@ -93,6 +93,21 @@ To change to a different player you need to change the refrence to the player wh
 
 You need to ensure that whatever function that you changee to it takes in the game state as an input and returns a usize which maps to the players move.
 
+You can generate documentation for this project using cargo
+
+1. Generate docs using cargo
+```sh
+cargo doc
+```
+2. Navigate to the docs
+```sh
+cd target/doc/Connect4
+```
+3. Open the documentation
+```sh
+xdg-open index.html
+```
+
 
 <!-- ROADMAP -->
 ## Roadmap
