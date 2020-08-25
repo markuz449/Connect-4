@@ -155,17 +155,17 @@ impl Game{
         // Checks to see if player has beaten the game
         if horizCount >= 4 || vertiCount >= 4 || diagCount1 >= 4 || diagCount2 >= 4{
             self.winner = Game::to_i8(self.current_player);
-        }
-        
-        // Checks if the game is a draw
-        let mut draw: i8 = 0;
-        for full in 0..7{
-            if self.board[full][0] != 0{
-                draw += 1;
+        } else{
+            // Checks if the game is a draw
+            let mut draw: i8 = 0;
+            for full in 0..7{
+                if self.board[full][0] != 0{
+                    draw += 1;
+                }
             }
-        }
-        if draw == 7{
-            self.winner = -1;
+            if draw == 7{
+                self.winner = -1;
+            }
         }
     }
 
@@ -465,6 +465,39 @@ mod tests{
         println!("Draw Game:");
         Game::print_board(&_game);
         assert_eq!(_game.winner, -1);
+    }
+
+    #[test]
+    fn check_full_board_won(){
+        let mut _game = Game::new_game();
+        let mut test_player: usize;
+        let mut count = 2;
+        for row in 0..7{
+            if count != 0{
+                test_player = 1;
+                count -= 1;
+            } else{
+                count = 2;
+                test_player = 2;
+            }
+            for col in 0..6{
+                _game.board[row][col] = test_player;
+                _game.board_check(row, col);
+                if test_player != 2{
+                    test_player += 1;
+                } else{
+                    test_player -= 1;
+                }
+            }
+        }
+        _game.board[0][0] = 1;
+        _game.board[0][1] = 1;
+        _game.board[0][2] = 1;
+        _game.board[0][3] = 1;
+        _game.board_check(0, 3);
+        print!("Player 1 should win");
+        Game::print_board(&_game);
+        assert_eq!(_game.winner, 1);
     }
 
     #[test]
