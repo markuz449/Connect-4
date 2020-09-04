@@ -8,7 +8,7 @@
   <h3 align="center">Connect 4</h3>
 
   <p align="center">
-    This is a simple connect 4 game that is built in Rust.
+    This is a simple terminal game of Connect 4.
   </p>
 </p>
 
@@ -34,7 +34,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project is the simple game of connect 4. I wanted to learn a new language and thought this would be a great project to do. The entire project has been built from the ground up and currently only works through terminal.
+This project is the game Connect 4. It runs in the terminal and can currently only be played with two people. This was the start of my Rust Connect 4 project which got me familiar with the language and how the game should be ran. I later then took the base of the game and turned it into an online version.
 
 
 ### Built With
