@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/markuz449/Connect-4">
-    <img src="images/logo.png" alt="Logo" width="200" height="200">
+    <img src="/logo/logo.png" alt="Logo" width="200" height="200">
   </a>
 
   <h3 align="center">Connect 4</h3>
@@ -29,7 +29,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project is the simple game of connect 4. I wanted to learn a new language and thought this would be a great project to do. The entire project has been built from the ground up and has two different versions, one which works on terminal the other is an online version.
+This project is the simple game of Connect 4. I wanted to learn a new language and thought this would be a great project to do. The entire project has been built from the ground up and has two different versions, one which works on terminal the other is an online version.
 
 
 ### Built With
