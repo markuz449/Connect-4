@@ -1,0 +1,31 @@
+{
+  "name": "connect-4",
+  "version": "1.0.0",
+  "description": "Online Connect 4 game developed with Rust and Node.JS",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "errorhandler": "^1.5.1",
+    "express": "^4.17.1",
+    "fs": "^0.0.1-security",
+    "nodemon": "^2.0.4",
+    "pusher": "^3.0.1",
+    "socket.io": "^2.3.0",
+    "sys": "^0.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markuz449/Connect-4.git"
+  },
+  "author": "Marcus Anderson",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/markuz449/Connect-4/issues"
+  },
+  "homepage": "https://github.com/markuz449/Connect-4#readme"
+}
