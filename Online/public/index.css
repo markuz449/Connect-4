@@ -1,0 +1,22 @@
+.header{
+    width: 15em; 
+    height: 15em;
+    padding-top: 4em;
+}
+
+.center {
+    text-align: center;
+    margin-left:auto; 
+    margin-right:auto;
+    justify-content: center;
+}
+
+.paragraph{
+    margin-top: 0.8em;
+    margin-bottom: 1.5em;
+}
+
+p{
+    margin-top: 0.5em;
+    margin-bottom: 0em;
+}
