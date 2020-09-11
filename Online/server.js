@@ -46,16 +46,27 @@ io.on('connection', (socket) => {
 
   //listen if a player disconnects
   socket.on('disconnect', () => {
+    console.log("Player Disconnected");
     var removeIndex = currentPlayers.indexOf(socket.user_id);
     if (removeIndex > -1) {
       currentPlayers.splice(removeIndex, 1);
     }
   });
 
+  // Generates a new game between two different players
+  if (currentPlayers.length > 1){
+    console.log("Starting new game");
+    var game_id = uuidv4();
+    var player1_id = currentPlayers.pop();
+    var player2_id = currentPlayers.pop();
+    io.sockets.emit('new_game', {game_id: game_id, player1: player1_id, player2: player2_id});
+  }
+
   //listen on new_message
   socket.on('players_choice', (data) => {
     //broadcast the new message
-    console.log("Choice: " + data.choice);
+    console.log("Choice: " + data.choice + ", Game ID: " + data.game_id);
+    io.sockets.emit('players_move', data);
   });
 
 });
