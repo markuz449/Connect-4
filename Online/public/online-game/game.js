@@ -10,6 +10,7 @@ let stringGame;
 
 // Create Connection to server
 var socket = io.connect('http://localhost:6969');
+var user_id;
 
 const runWasm = async () => {
   // Instantiate our wasm module
@@ -133,3 +134,8 @@ window.choice_7 = () => {
 window.play_again = () => {
   restart_game();
 }
+
+socket.on('new_player', (data) => {
+  user_id = data.user_id;
+  console.log(user_id);
+});
