@@ -12,8 +12,7 @@ let stringGame;
 var socket = io.connect('/');
 var user_id;
 var game_id;
-var opponent_id;
-var current_player_id;
+var my_move;
 
 const runWasm = async () => {
   // Instantiate our wasm module
@@ -27,7 +26,7 @@ runWasm();
 
 // Sends the players move to the server if it is their turn
 function players_move(choice_num){
-  if (game_id != null && current_player_id == user_id){
+  if (game_id != null && my_move == true){
     
     socket.emit('players_choice', {choice : choice_num, game_id: game_id});
     update_board(choice_num);
@@ -79,7 +78,7 @@ function game_over(){
   var winner_text_id = "game_over_text";
   if (jsonGame.winner == -1){
     document.getElementById(winner_text_id).innerHTML = "Draw Game";
-  } else if (current_player_id == user_id){
+  } else if (my_move == true){
     document.getElementById(winner_text_id).innerHTML = "You Won";
   } else{
     document.getElementById(winner_text_id).innerHTML = "Your Opponent Won";
@@ -128,8 +127,7 @@ function game_status(){
   console.log("Game Status:");
   console.log("User ID: " + user_id);
   console.log("Current Game: " + game_id);
-  console.log("Opponent ID: " + opponent_id);
-  console.log("Current Player: " + current_player_id);
+  console.log("My move? " + my_move);
 }
 
 socket.on('new_player', (data) => {
@@ -137,35 +135,29 @@ socket.on('new_player', (data) => {
 });
 
 socket.on('new_game', (data) => {
-  if (data.player1 == user_id || data.player2 == user_id){
-    game_id = data.game_id;
+  game_id = data.game_id;
 
-    // Sets oppopnent id and sets current player
-    if (data.player2 != user_id){
-      opponent_id = data.player2;
-      current_player_id = user_id;
-      document.getElementById("player").innerHTML = "Your turn";
-    } else{
-      opponent_id = data.player1;
-      current_player_id = opponent_id;
-      document.getElementById("player").innerHTML = "Opponents turn";
-    }
-    game_status();
+  // Sets oppopnent id and sets current player
+  if (data.start_player == true){
+    my_move = true;
+    document.getElementById("player").innerHTML = "Your turn";
+  } else{
+    my_move = false;
+    document.getElementById("player").innerHTML = "Opponents turn";
   }
+  game_status();
 });
 
 socket.on('players_move', (data) => {
   if (data.game_id == game_id){
-    if(current_player_id != user_id){
+    if(my_move == false){
       update_board(data.choice);
-      current_player_id = user_id;
+      my_move = true;
       document.getElementById("player").innerHTML = "Your turn";
       game_status();
     } else{
-      current_player_id = opponent_id;
+      my_move = false;
       document.getElementById("player").innerHTML = "Opponents turn";
     }
   }
 });
-
-
