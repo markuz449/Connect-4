@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
     if (removeIndex > -1) {
       player_queue.splice(removeIndex, 1);
     } 
-    
+
   });
 
   // Generates a new game between two different players
@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
   //listen on new_message
   socket.on('players_choice', (data) => {
     //broadcast the new message
-    console.log("Choice: " + data.choice + ", Game ID: " + data.game_id);
+    //console.log("Choice: " + data.choice + ", Game ID: " + data.game_id);
     io.sockets.emit('players_move', data);
   });
 

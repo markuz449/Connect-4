@@ -154,7 +154,7 @@ socket.on('players_move', (data) => {
       update_board(data.choice);
       my_move = true;
       document.getElementById("player").innerHTML = "Your turn";
-      game_status();
+      //game_status();
     } else{
       my_move = false;
       document.getElementById("player").innerHTML = "Opponents turn";
