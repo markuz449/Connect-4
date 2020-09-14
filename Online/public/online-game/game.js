@@ -9,7 +9,7 @@ let jsonGame;
 let stringGame;
 
 // Create Connection to server
-var socket = io.connect('http://localhost:6969');
+var socket = io.connect('/');
 var user_id;
 var game_id;
 var opponent_id;
@@ -114,28 +114,10 @@ function restart_game(){
   }
 }
 
-// Buttons used for player input
-// Represents the slots of the game board
-window.choice_1 = () => {
-  players_move(0);
-}
-window.choice_2 = () => {
-  players_move(1);
-}
-window.choice_3 = () => {
-  players_move(2);
-}
-window.choice_4 = () => {
-  players_move(3);
-}
-window.choice_5 = () => {
-  players_move(4);
-}
-window.choice_6 = () => {
-  players_move(5);
-}
-window.choice_7 = () => {
-  players_move(6);
+// Takes the users input and grabs the column number as their move
+window.move = (column_num) => {
+  let choice_num = parseInt(column_num.getAttribute("data-column"));
+  players_move(choice_num);
 }
 
 window.play_again = () => {

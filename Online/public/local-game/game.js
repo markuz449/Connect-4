@@ -19,7 +19,7 @@ const runWasm = async () => {
 runWasm();
 
 // The new player function
-function update(choice_num){
+function players_move(choice_num){
   let col_index = 6;
   let placement = 6 * col_index + choice_num;
   for (col_index; col_index > 0; col_index--){
@@ -96,28 +96,10 @@ function restart_game(){
   }
 }
 
-// Buttons used for player input
-// Represents the slots of the game board
-window.choice_1 = () => {
-  update(0);
-}
-window.choice_2 = () => {
-  update(1);
-}
-window.choice_3 = () => {
-  update(2);
-}
-window.choice_4 = () => {
-  update(3);
-}
-window.choice_5 = () => {
-  update(4);
-}
-window.choice_6 = () => {
-  update(5);
-}
-window.choice_7 = () => {
-  update(6);
+// Takes the users input and grabs the column number as their move
+window.move = (column_num) => {
+  let choice_num = parseInt(column_num.getAttribute("data-column"));
+  players_move(choice_num);
 }
 
 window.play_again = () => {

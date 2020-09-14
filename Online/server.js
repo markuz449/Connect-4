@@ -6,7 +6,8 @@ var {v4: uuidv4 }  = require("uuid");
 var app = express();
 var root = __dirname + "/public";
 
-var currentPlayers = [];
+var player_queue = [];
+var current_games = [];
 
 // Parse application/json and application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -41,25 +42,27 @@ const io = require("socket.io")(server);
 io.on('connection', (socket) => {
   console.log('New player connected');
   socket.user_id = uuidv4();
-  currentPlayers.push(socket.user_id);
+  player_queue.push(socket.user_id);
   socket.emit('new_player', {user_id: socket.user_id});
 
   //listen if a player disconnects
   socket.on('disconnect', () => {
     console.log("Player Disconnected");
-    var removeIndex = currentPlayers.indexOf(socket.user_id);
+    var removeIndex = player_queue.indexOf(socket.user_id);
     if (removeIndex > -1) {
-      currentPlayers.splice(removeIndex, 1);
-    }
+      player_queue.splice(removeIndex, 1);
+    } 
   });
 
   // Generates a new game between two different players
-  if (currentPlayers.length > 1){
+  if (player_queue.length > 1){
     console.log("Starting new game");
     var game_id = uuidv4();
-    var player1_id = currentPlayers.pop();
-    var player2_id = currentPlayers.pop();
-    io.sockets.emit('new_game', {game_id: game_id, player1: player1_id, player2: player2_id});
+    var player1_id = player_queue.pop();
+    var player2_id = player_queue.pop();
+    let new_game = {game_id: game_id, player1: player1_id, player2: player2_id};
+    current_games.push(new_game);
+    io.sockets.emit('new_game', new_game);
   }
 
   //listen on new_message
