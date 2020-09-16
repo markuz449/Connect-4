@@ -34,9 +34,9 @@ app.use(express.static(root));
 console.log("Starting Express Server");
 server = app.listen(6969);
 
-
 //socket.io instantiation
 const io = require("socket.io")(server);
+
 
 //listen on every connection
 io.on('connection', (socket) => {
@@ -45,22 +45,29 @@ io.on('connection', (socket) => {
   socket.emit('new_player', {user_id: socket.id});
 
   // Listens if a player disconnects
-  // Checks if they were in a game or not
+  // Checks if they were in a game or not, if so, tell the opponent that they forfeited
   socket.on('disconnect', () => {
     console.log("Player disconnected from queue");
     var removeIndex = player_queue.indexOf(socket.id);
     if (removeIndex > -1) {
       player_queue.splice(removeIndex, 1);
     } else{
-      for(let i = 0; i < current_games.length; i++){
-        if(current_games[i].player1 == socket.id){
-          io.to(current_games[i].player2).emit('forfeit_win');
-          current_games.splice(i, 1);
+      let game_index = -1;
+      for(game_index = 0; game_index < current_games.length; game_index++){
+        if(current_games[game_index].player1 == socket.id){
+          io.to(current_games[game_index].player2).emit('forfeit_win');
+          current_games[game_index].player1 = null;
           break;
-        } else if(current_games[i].player2 == socket.id){
-          io.to(current_games[i].player1).emit('forfeit_win');
-          current_games.splice(i, 1);
+        } else if(current_games[game_index].player2 == socket.id){
+          io.to(current_games[game_index].player1).emit('forfeit_win');
+          current_games[game_index].player2 = null;
           break;
+        }
+      }
+      // Checks if no one is connected to the current game, if so, remove it.
+      if (game_index >= 0 && game_index <= current_games.length){
+        if (current_games[game_index].player1 == null && current_games[game_index].player2 == null){
+          current_games.splice[game_index, 1];
         }
       }
     }
@@ -86,22 +93,14 @@ io.on('connection', (socket) => {
     }
   }
 
-  //listen on new_message
+  //listen on new_message and then sends the move to the opponent
   socket.on('players_choice', (data) => {
-    let game_index = -1;
-    for (let i = 0; i < current_games.length; i++){
-      if (current_games[i].game_id == data.game_id){
-        game_index = i;
-        break;
-      }
-    }
+    let game_index = get_game_index(data.game_id);
     if (game_index >= 0){
       current_game = current_games[game_index];
       if (current_game.player1 == socket.id){
-        console.log("Sending to: " + current_game.player2);
         io.to(current_game.player2).emit('opponents_move', data);
       } else{
-        console.log("Sending to: " + current_game.player1);
         io.to(current_game.player1).emit('opponents_move', data);
       }
     } else{
@@ -109,4 +108,40 @@ io.on('connection', (socket) => {
     }
   });
 
+  //listens if the user wants to play again
+  //FUTURE -- set a timer so the same two clients can play each other again
+  socket.on('play_again', (data) => {
+    console.log("Play again")
+    let game_index = get_game_index(data.game_id);
+    if (game_index >= 0){
+      game = current_games[game_index];
+      //Sets their refrence in game to null
+      if (game.player1 == data.user_id){
+        game.player1 = null;
+      } else{
+        game.player2 = null;
+      }
+      //If both clients have left, remove the game from the list
+      if (game.player1 == null && game.player2 == null){
+        current_games.splice(game_index, 1);
+      }
+      //Add the player back to the queue
+      player_queue.push(data.user_id);
+    }
+  });
+
 });
+
+
+
+/* Supporting functions */
+function get_game_index(game_id){
+  let game_index = -1;
+  for (let i = 0; i < current_games.length; i++){
+    if (current_games[i].game_id == game_id){
+      game_index = i;
+      break;
+    }
+  }
+  return game_index;
+}

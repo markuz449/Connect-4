@@ -31,7 +31,6 @@ function players_move(choice_num){
       socket.emit('players_choice', {choice : choice_num, game_id: game_id});
       document.getElementById("player").innerHTML = "Opponents turn";
       console.log("I made the move: " + choice_num)
-      game_status();
     }
   }
 }
@@ -101,6 +100,7 @@ function game_over(){
 // Resets the game and starts again
 function restart_game(){
   if(jsonGame.winner != 0){
+    socket.emit('play_again', {game_id: game_id, user_id: user_id});
     user_id = null;
     game_id = null;
     player_num = null;
@@ -166,7 +166,6 @@ socket.on('opponents_move', (data) => {
       update_board(data.choice);
       document.getElementById("player").innerHTML = "Your turn";
       console.log("Recieved opponenets move: " + data.choice);
-      game_status();
     } /*else{
       player_swap();
       document.getElementById("player").innerHTML = "Opponents turn";
@@ -180,6 +179,8 @@ socket.on('disconnect', () =>{
 });
 
 socket.on('forfeit_win', () => {
-  jsonGame.winner = -2;
-  game_over();
+  if (jsonGame.winner == 0){
+    jsonGame.winner = -2;
+    game_over();
+  }
 });
