@@ -12,7 +12,7 @@ let stringGame;
 var socket = io.connect('/');
 var user_id;
 var game_id;
-var my_move;
+var player_num;
 
 const runWasm = async () => {
   // Instantiate our wasm module
@@ -26,10 +26,13 @@ runWasm();
 
 // Sends the players move to the server if it is their turn
 function players_move(choice_num){
-  if (game_id != null && my_move == true){
-    
-    socket.emit('players_choice', {choice : choice_num, game_id: game_id});
-    update_board(choice_num);
+  if (game_id != null && jsonGame.current_player == player_num){
+    if(update_board(choice_num)){
+      socket.emit('players_choice', {choice : choice_num, game_id: game_id});
+      document.getElementById("player").innerHTML = "Opponents turn";
+      console.log("I made the move: " + choice_num)
+      game_status();
+    }
   }
 }
 
@@ -58,6 +61,9 @@ function update_board(choice_num){
     } else{
       player_swap();
     }
+    return true;
+  } else{
+    return false;
   }
 }
 
@@ -78,7 +84,9 @@ function game_over(){
   var winner_text_id = "game_over_text";
   if (jsonGame.winner == -1){
     document.getElementById(winner_text_id).innerHTML = "Draw Game";
-  } else if (my_move == true){
+  } else if (jsonGame.winner == -2){
+    document.getElementById(winner_text_id).innerHTML = "You Won via Forfeit";
+  } else if (jsonGame.winner == player_num){
     document.getElementById(winner_text_id).innerHTML = "You Won";
   } else{
     document.getElementById(winner_text_id).innerHTML = "Your Opponent Won";
@@ -93,6 +101,9 @@ function game_over(){
 // Resets the game and starts again
 function restart_game(){
   if(jsonGame.winner != 0){
+    user_id = null;
+    game_id = null;
+    player_num = null;
     var current_player_display = document.getElementById("player");
     current_player_display.style.display = "block";
 
@@ -127,7 +138,8 @@ function game_status(){
   console.log("Game Status:");
   console.log("User ID: " + user_id);
   console.log("Current Game: " + game_id);
-  console.log("My move? " + my_move);
+  console.log("Current Player: " + jsonGame.current_player);
+  console.log("Player num: " + player_num);
 }
 
 socket.on('new_player', (data) => {
@@ -136,28 +148,38 @@ socket.on('new_player', (data) => {
 
 socket.on('new_game', (data) => {
   game_id = data.game_id;
-
+  player_num = data.start_player;
+  jsonGame.current_player = 1;
   // Sets oppopnent id and sets current player
-  if (data.start_player == true){
-    my_move = true;
+  if (data.start_player == 1){
     document.getElementById("player").innerHTML = "Your turn";
   } else{
-    my_move = false;
     document.getElementById("player").innerHTML = "Opponents turn";
   }
+  console.log("Game start")
   game_status();
 });
 
-socket.on('players_move', (data) => {
+socket.on('opponents_move', (data) => {
   if (data.game_id == game_id){
-    if(my_move == false){
+    if(jsonGame.current_player != player_num){
       update_board(data.choice);
-      my_move = true;
       document.getElementById("player").innerHTML = "Your turn";
-      //game_status();
-    } else{
-      my_move = false;
+      console.log("Recieved opponenets move: " + data.choice);
+      game_status();
+    } /*else{
+      player_swap();
       document.getElementById("player").innerHTML = "Opponents turn";
-    }
+    }*/
   }
+});
+
+socket.on('disconnect', () =>{
+  jsonGame.winner = -10; //This is so that the game will restart on the clients end
+  restart_game();
+});
+
+socket.on('forfeit_win', () => {
+  jsonGame.winner = -2;
+  game_over();
 });

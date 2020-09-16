@@ -14,7 +14,7 @@ const runWasm = async () => {
 
   stringGame = start();
   jsonGame = JSON.parse(stringGame);
-  let player_start = Math.round(Math.random());
+  let player_start = (Math.round(Math.random())) + 1;
   jsonGame.current_player = player_start;
   document.getElementById("player").innerHTML = "Current Player: " + jsonGame.current_player;
 };
