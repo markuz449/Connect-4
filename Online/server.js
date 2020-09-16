@@ -44,14 +44,26 @@ io.on('connection', (socket) => {
   player_queue.push(socket.id);
   socket.emit('new_player', {user_id: socket.id});
 
-  //listen if a player disconnects
+  // Listens if a player disconnects
+  // Checks if they were in a game or not
   socket.on('disconnect', () => {
-    console.log("Player Disconnected");
+    console.log("Player disconnected from queue");
     var removeIndex = player_queue.indexOf(socket.id);
     if (removeIndex > -1) {
       player_queue.splice(removeIndex, 1);
-    } 
-
+    } else{
+      for(let i = 0; i < current_games.length; i++){
+        if(current_games[i].player1 == socket.id){
+          io.to(current_games[i].player2).emit('forfeit_win');
+          current_games.splice(i, 1);
+          break;
+        } else if(current_games[i].player2 == socket.id){
+          io.to(current_games[i].player1).emit('forfeit_win');
+          current_games.splice(i, 1);
+          break;
+        }
+      }
+    }
   });
 
   // Generates a new game between two different players
@@ -66,19 +78,35 @@ io.on('connection', (socket) => {
     current_games.push(new_game);
 
     if (player_start == 1){
-      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: true})
-      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: false})
+      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: 1})
+      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: 2})
     } else{
-      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: false})
-      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: true})
+      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: 2})
+      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: 1})
     }
   }
 
   //listen on new_message
   socket.on('players_choice', (data) => {
-    //broadcast the new message
-    //console.log("Choice: " + data.choice + ", Game ID: " + data.game_id);
-    io.sockets.emit('players_move', data);
+    let game_index = -1;
+    for (let i = 0; i < current_games.length; i++){
+      if (current_games[i].game_id == data.game_id){
+        game_index = i;
+        break;
+      }
+    }
+    if (game_index >= 0){
+      current_game = current_games[game_index];
+      if (current_game.player1 == socket.id){
+        console.log("Sending to: " + current_game.player2);
+        io.to(current_game.player2).emit('opponents_move', data);
+      } else{
+        console.log("Sending to: " + current_game.player1);
+        io.to(current_game.player1).emit('opponents_move', data);
+      }
+    } else{
+      console.log("Error with game communication");
+    }
   });
 
 });
