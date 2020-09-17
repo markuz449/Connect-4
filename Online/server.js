@@ -9,6 +9,9 @@ var root = __dirname + "/public";
 var player_queue = [];
 var current_games = [];
 
+// Setting game timer
+var game_timer = setInterval(start_game, 3000);
+
 // Parse application/json and application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
   extended: true
@@ -73,26 +76,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Generates a new game between two different players
-  if (player_queue.length > 1){
-    console.log("Starting new game");
-    var game_id = uuidv4();
-    var player1_id = player_queue.pop();
-    var player2_id = player_queue.pop();
-    var player_start = Math.round(Math.random());
-
-    let new_game = {game_id: game_id, player1: player1_id, player2: player2_id};
-    current_games.push(new_game);
-
-    if (player_start == 1){
-      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: 1})
-      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: 2})
-    } else{
-      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: 2})
-      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: 1})
-    }
-  }
-
   //listen on new_message and then sends the move to the opponent
   socket.on('players_choice', (data) => {
     let game_index = get_game_index(data.game_id);
@@ -132,6 +115,28 @@ io.on('connection', (socket) => {
 
 });
 
+// Timed function that gets called every 3 seconds, checks if a game should start
+function start_game(){
+  // Generates a new game between two different players
+  if (player_queue.length > 1){
+    console.log("Starting new game");
+    var game_id = uuidv4();
+    var player1_id = player_queue.pop();
+    var player2_id = player_queue.pop();
+    var player_start = Math.round(Math.random());
+
+    let new_game = {game_id: game_id, player1: player1_id, player2: player2_id};
+    current_games.push(new_game);
+
+    if (player_start == 1){
+      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: 1})
+      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: 2})
+    } else{
+      io.to(player1_id).emit('new_game', {game_id: game_id, start_player: 2})
+      io.to(player2_id).emit('new_game', {game_id: game_id, start_player: 1})
+    }
+  }
+}
 
 
 /* Supporting functions */
