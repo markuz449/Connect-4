@@ -20,7 +20,7 @@ const runWasm = async () => {
 
   stringGame = start();
   jsonGame = JSON.parse(stringGame);
-  document.getElementById("player").innerHTML = "Saerching for opponent..."
+  document.getElementById("player").innerHTML = "Searching for opponent..."
 };
 runWasm();
 
@@ -101,9 +101,7 @@ function game_over(){
 function restart_game(){
   if(jsonGame.winner != 0){
     socket.emit('play_again', {game_id: game_id, user_id: user_id});
-    user_id = null;
-    game_id = null;
-    player_num = null;
+    clear_data();
     var current_player_display = document.getElementById("player");
     current_player_display.style.display = "block";
 
@@ -142,6 +140,12 @@ function game_status(){
   console.log("Player num: " + player_num);
 }
 
+function clear_data(){
+  user_id = null;
+  game_id = null;
+  player_num = null;
+}
+
 socket.on('new_player', (data) => {
   user_id = data.user_id;
 });
@@ -174,8 +178,8 @@ socket.on('opponents_move', (data) => {
 });
 
 socket.on('disconnect', () =>{
-  jsonGame.winner = -10; //This is so that the game will restart on the clients end
-  restart_game();
+  clear_data();
+  runWasm();
 });
 
 socket.on('forfeit_win', () => {
