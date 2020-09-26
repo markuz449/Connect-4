@@ -67,6 +67,7 @@ io.on('connection', (socket) => {
           break;
         }
       }
+      // THERE IS A BUG HERE!!!!
       // Checks if no one is connected to the current game, if so, remove it.
       if (game_index >= 0 && game_index <= current_games.length){
         if (current_games[game_index].player1 == null && current_games[game_index].player2 == null){
@@ -110,6 +111,20 @@ io.on('connection', (socket) => {
       }
       //Add the player back to the queue
       player_queue.push(data.user_id);
+    }
+  });
+
+  // Listens if the opponent doesn't make a move in time
+  socket.on('timeout', (data) => {
+    console.log("Timeout");
+    let game_index = get_game_index(data.game_id);
+    if (game_index >= 0){
+      game = current_games[game_index];
+      if (game.player1 == data.user_id){
+        io.to(game.player2).emit('timeout_win');
+      } else{
+        io.to(game.player1).emit('timeout_win');
+      }
     }
   });
 

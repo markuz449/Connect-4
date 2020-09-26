@@ -28,7 +28,7 @@
     flex-flow: nowrap;
 }
 
-.pure-u-1-24{
+.dot-container{
     width: 3em;
     height: 3em;
     border-style: solid;
@@ -62,6 +62,10 @@
     background-color: yellow;
     border-radius: 50%;
     margin: 0;
+}
+
+.invis {
+    visibility: hidden;
 }
 
 h1{
