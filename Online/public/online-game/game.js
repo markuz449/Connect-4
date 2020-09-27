@@ -81,6 +81,7 @@ function player_swap(){
 
 // Displays who the winner is
 function game_over(){
+  clear_timeouts();
   var winner_text_id = "game_over_text";
   if (jsonGame.winner == -1){
     document.getElementById(winner_text_id).innerHTML = "Draw Game";
@@ -109,6 +110,7 @@ function restart_game(){
     }
 
     document.getElementById("player_info").classList.remove("invis");
+    document.getElementById("timer").classList.add("invis");
     document.getElementById("game_over").classList.add("invis");
     document.getElementById("play_again").classList.add("invis");
 

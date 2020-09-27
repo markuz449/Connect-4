@@ -43,36 +43,38 @@ const io = require("socket.io")(server);
 
 //listen on every connection
 io.on('connection', (socket) => {
-  console.log('New player connected');
+  console.log('New player connected: ' + socket.id.substring(0, 3));
   player_queue.push(socket.id);
   socket.emit('new_player', {user_id: socket.id});
 
   // Listens if a player disconnects
   // Checks if they were in a game or not, if so, tell the opponent that they forfeited
   socket.on('disconnect', () => {
-    console.log("Player disconnected from queue");
+    console.log("Player: " + socket.id.substring(0, 3) + " disconnecting...");
     var removeIndex = player_queue.indexOf(socket.id);
     if (removeIndex > -1) {
+      console.log("Player disconnected from queue");
       player_queue.splice(removeIndex, 1);
-    } else{
-      let game_index = -1;
-      for(game_index = 0; game_index < current_games.length; game_index++){
-        if(current_games[game_index].player1 == socket.id){
-          io.to(current_games[game_index].player2).emit('forfeit_win');
-          current_games[game_index].player1 = null;
-          break;
-        } else if(current_games[game_index].player2 == socket.id){
-          io.to(current_games[game_index].player1).emit('forfeit_win');
-          current_games[game_index].player2 = null;
-          break;
-        }
+    } 
+
+    let game_index = -1;
+    for(game_index = 0; game_index < current_games.length; game_index++){
+      if(current_games[game_index].player1 == socket.id){
+        io.to(current_games[game_index].player2).emit('forfeit_win');
+        current_games[game_index].player1 = null;
+        break;
+      } else if(current_games[game_index].player2 == socket.id){
+        io.to(current_games[game_index].player1).emit('forfeit_win');
+        current_games[game_index].player2 = null;
+        break;
       }
-      // THERE IS A BUG HERE!!!!
-      // Checks if no one is connected to the current game, if so, remove it.
-      if (game_index >= 0 && game_index <= current_games.length){
-        if (current_games[game_index].player1 == null && current_games[game_index].player2 == null){
-          current_games.splice[game_index, 1];
-        }
+    }
+    // THERE IS A BUG HERE!!!!
+    // Checks if no one is connected to the current game, if so, remove it.
+    if (game_index >= 0 && game_index < current_games.length){
+      if (current_games[game_index].player1 == null && current_games[game_index].player2 == null){
+        current_games.splice(game_index);
+        console.log("Removed a game 1, current list: " + current_games);
       }
     }
   });
@@ -107,7 +109,8 @@ io.on('connection', (socket) => {
       }
       //If both clients have left, remove the game from the list
       if (game.player1 == null && game.player2 == null){
-        current_games.splice(game_index, 1);
+        current_games.splice(game_index);
+        console.log("Removed a game 2, current list: " + current_games);
       }
       //Add the player back to the queue
       player_queue.push(data.user_id);
