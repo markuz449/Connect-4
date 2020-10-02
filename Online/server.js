@@ -45,6 +45,7 @@ const io = require("socket.io")(server);
 io.on('connection', (socket) => {
   console.log('New player connected: ' + socket.id.substring(0, 3));
   player_queue.push(socket.id);
+  console.log("Current Players: " + player_queue);
   socket.emit('new_player', {user_id: socket.id});
 
   // Listens if a player disconnects

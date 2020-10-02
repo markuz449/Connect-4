@@ -1,3 +1,12 @@
+:root {
+    --color-1: #4DD0E1;
+    --color-2: #AB47BC;
+    --color-board: #505050;
+    --color-background: #242424;
+    --color-background-hover: #8d8d8d;
+    --color-text: #FFFFFF
+}
+
 .header{
     display: inline-flex;
     text-align: center;
@@ -18,9 +27,10 @@
     flex-direction: column;
     justify-content: center;
     border: 0.5em;
-    border-color: blue;
+    border-color: var(--color-board);
     border-style: solid;
     border-radius: 3%;
+    background: var(--color-board);
 }
 
 .pure-g{
@@ -31,44 +41,43 @@
 .dot-container{
     width: 3em;
     height: 3em;
-    border-style: solid;
-    border-color: blue;
-    background-color: blue;
+    border: 0.3em solid transparent;
 }
 
 .dot:hover{
-    background-color: lightgray;
+    background-color: var(--color-background-hover);
 }
 
 .dot {
     height: 3em;
     width: 3em;
-    background-color: white;
+    background-color: var(--color-background);
     border-radius: 50%;
     margin: 0;
 }
 
 .red-dot {
-    height: 3em;
-    width: 3em;
-    background-color: red;
-    border-radius: 50%;
-    margin: 0;
+    background-color: var(--color-2)
 }
 
 .yellow-dot {
-    height: 3em;
-    width: 3em;
-    background-color: yellow;
-    border-radius: 50%;
-    margin: 0;
+    background-color: var(--color-1)
 }
 
 .invis {
     visibility: hidden;
 }
 
-h1{
+body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+a {
+    color: var(--color-text);
+}
+
+h1 {
     padding-left: 0.6em;
 }
 
@@ -85,7 +94,7 @@ h1{
 .yello-dot-anim{
     height: 3em;
     width: 3em;
-    background-color: yellow;
+    background-color: #AF16DB;
     border-radius: 50%;
     margin: 0;
     animation-name: drop;
@@ -93,7 +102,7 @@ h1{
 }
 
 @keyframes drop{
-    0%	{margin-top: 5px; background-color:red;}
+    0%	{margin-top: 5px; background-color:#93DB16;}
     10%	{margin-top: 10px;}
     20%	{margin-top: 15px;}
     30%	{margin-top: 20px;}

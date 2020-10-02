@@ -16,7 +16,7 @@ const runWasm = async () => {
   jsonGame = JSON.parse(stringGame);
   let player_start = (Math.round(Math.random())) + 1;
   jsonGame.current_player = player_start;
-  document.getElementById("player").innerHTML = "Current Player: " + jsonGame.current_player;
+  document.getElementById("current_player").innerHTML = "Current Player: " + jsonGame.current_player;
 };
 runWasm();
 
@@ -29,9 +29,9 @@ function players_move(choice_num){
 
     if (document.getElementById(id_check).className == "dot"){
       if (jsonGame.current_player == 1){
-        document.getElementById(id_check).className = "red-dot";
+        document.getElementById(id_check).classList.add("red-dot");
       } else{
-        document.getElementById(id_check).className = "yellow-dot";
+        document.getElementById(id_check).classList.add("yellow-dot");
       }
       break;
     } else{
@@ -57,7 +57,7 @@ function player_swap(){
   } else{
     jsonGame.current_player -= 1;
   }
-  document.getElementById("player").innerHTML = "Current Player: " + jsonGame.current_player;
+  document.getElementById("current_player").innerHTML = "Current Player: " + jsonGame.current_player;
 }
 
 // Displays who the winner is
@@ -71,30 +71,24 @@ function game_over(){
   } else{
     document.getElementById(winner_text_id).innerHTML = "Draw Game";
   }
-  var game_over_display = document.getElementById("game_over");
-  game_over_display.style.display = "block";
 
-  var play_button = document.getElementById("play_again");
-  play_button.style.display = "block";
+  document.getElementById("player_info").classList.add("invis");
+  document.getElementById("game_over").classList.remove("invis");
+  document.getElementById("play_again").classList.remove("invis");
 }
 
 // Resets the game and starts again
 function restart_game(){
-  if(jsonGame.winner != 0){
-    var game_over_display = document.getElementById("game_over");
-    game_over_display.style.display = "none";
+  if (jsonGame.winner != null){
 
-    var play_button = document.getElementById("play_again");
-    play_button.style.display = "none";
+    document.getElementById("player_info").classList.remove("invis");
+    document.getElementById("game_over").classList.add("invis");
+    document.getElementById("play_again").classList.add("invis");
 
-    let clear_board = 1;
-    for (clear_board; clear_board <= 42; clear_board++){
-      let id_check = "board_" + clear_board;
-      document.getElementById(id_check).className = "dot";
-    }
+    clear_game();
     runWasm();
   } else{
-    console.log("There is a game in progress...")
+    console.log("There is a game in progress...");
   }
 }
 
@@ -106,4 +100,14 @@ window.move = (column_num) => {
 
 window.play_again = () => {
   restart_game();
+}
+
+// Clears the game
+function clear_game(){
+
+  let clear_board = 1;
+  for (clear_board; clear_board <= 42; clear_board++){
+    let id_check = "board_" + clear_board;
+    document.getElementById(id_check).className = "dot";
+  }
 }

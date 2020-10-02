@@ -1,3 +1,8 @@
+:root {
+    --color-background: #242424;
+    --color-text: #FFFFFF
+}
+
 .header{
     width: 15em; 
     height: 15em;
@@ -14,6 +19,15 @@
 .paragraph{
     margin-top: 0.8em;
     margin-bottom: 1.5em;
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+a {
+    color: var(--color-text);
 }
 
 p{
