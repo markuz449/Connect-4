@@ -44,10 +44,6 @@
     border: 0.3em solid transparent;
 }
 
-.dot:hover{
-    background-color: var(--color-background-hover);
-}
-
 .dot {
     height: 3em;
     width: 3em;
@@ -62,6 +58,20 @@
 
 .yellow-dot {
     background-color: var(--color-1)
+}
+
+@media (hover :hover){
+    .dot:hover{
+        background-color: var(--color-background-hover);
+    } 
+
+    .red-dot:hover {
+        background-color: var(--color-2)
+    }
+    
+    .yellow-dot:hover {
+        background-color: var(--color-1)
+    }  
 }
 
 .invis {

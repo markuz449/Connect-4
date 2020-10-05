@@ -47,7 +47,7 @@ function update_board(choice_num){
 
     if (document.getElementById(id_check).className == "dot"){
       if (jsonGame.current_player == 1){
-        document.getElementById(id_check).classList.add("red-dot");
+        document.getElementById(id_check).classList.add("red-dot");      
       } else{
         document.getElementById(id_check).classList.add("yellow-dot");
       }

@@ -3,7 +3,7 @@
     --color-2: #AB47BC;
     --color-board: #505050;
     --color-background: #242424;
-    --color-background-hover: #8d8d8d;
+    --color-background-hover: #d4d4d470;
     --color-text: #FFFFFF
 }
 
@@ -44,10 +44,6 @@
     border: 0.3em solid transparent;
 }
 
-.dot:hover{
-    background-color: var(--color-background-hover);
-}
-
 .dot {
     height: 3em;
     width: 3em;
@@ -64,6 +60,20 @@
     background-color: var(--color-1)
 }
 
+@media (hover :hover){
+    .dot:hover{
+        background-color: var(--color-background-hover);
+    }
+
+    .red-dot:hover {
+        background-color: var(--color-2)
+    }
+    
+    .yellow-dot:hover {
+        background-color: var(--color-1)
+    }  
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 .invis {
     visibility: hidden;
 }
