@@ -134,8 +134,12 @@ io.on('connection', (socket) => {
 
 });
 
-// Timed function that gets called every 3 seconds, checks if a game should start
+/** Timed Functions that get called every 3 seconds */
+// Checks if a game should start
 function start_game(){
+  // Check if the players in the queue are still active
+  check_player_queue();
+
   // Generates a new game between two different players
   if (player_queue.length > 1){
     console.log("Starting new game");
@@ -168,4 +172,16 @@ function get_game_index(game_id){
     }
   }
   return game_index;
+}
+
+function check_player_queue(){
+  if (player_queue.length > 0){
+    var count;
+    for (count = 0; count < player_queue.length; count++){
+      if(io.sockets.sockets[player_queue[count]] == undefined){
+        console.log("Removing: " + player_queue[count]); 
+        player_queue.splice(count, 1);
+      }
+    }
+  }
 }

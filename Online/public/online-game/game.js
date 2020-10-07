@@ -104,20 +104,22 @@ function game_over(){
 
 // Resets the game and starts again
 function restart_game(){
-  if (jsonGame.winner != null){
-    if (jsonGame.winner != 0){
-      socket.emit('play_again', {game_id: game_id, user_id: user_id});
+  if (jsonGame != null){
+    if (jsonGame.winner != null){
+      if (jsonGame.winner != 0){
+        socket.emit('play_again', {game_id: game_id, user_id: user_id});
+      }
+
+      document.getElementById("player_info").classList.remove("invis");
+      document.getElementById("timer").classList.add("invis");
+      document.getElementById("game_over").classList.add("invis");
+      document.getElementById("play_again").classList.add("invis");
+
+      clear_game();
+      runWasm();
+    } else{
+      console.log("There is a game in progress...");
     }
-
-    document.getElementById("player_info").classList.remove("invis");
-    document.getElementById("timer").classList.add("invis");
-    document.getElementById("game_over").classList.add("invis");
-    document.getElementById("play_again").classList.add("invis");
-
-    clear_game();
-    runWasm();
-  } else{
-    console.log("There is a game in progress...");
   }
 }
 
