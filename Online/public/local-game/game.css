@@ -1,24 +1,47 @@
 :root {
-    --color-1: #4DD0E1;
-    --color-2: #AB47BC;
+    --player-1-color: #4DD0E1;
+    --player-2-color: #AB47BC;
     --color-board: #505050;
     --color-background: #242424;
     --color-background-hover: #8d8d8d;
-    --color-text: #FFFFFF
+    --color-text: #FFFFFF;
+    --dot-size: max(4vw, 40px);
 }
 
 .header{
+    padding-top: 0em;
+}
+
+.connect-4-header{
     display: inline-flex;
+    flex-wrap: wrap;
     text-align: center;
     align-items: center;
-    padding: 1em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+@media only screen and (max-width: 740px) {
+    .connect-4-header{
+        justify-content: center;
+    }
 }
 
 .center {
     text-align: center;
     margin-left:auto; 
     margin-right:auto;
-    justify-content: center;
+}
+
+.text-spacing{
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+.board-center{
+    text-align: center;
+    margin-left:auto; 
+    margin-right:auto;
 }
 
 .board-flex{
@@ -26,7 +49,7 @@
     flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
-    border: 0.5em;
+    border: max(0.6vw, 3px);
     border-color: var(--color-board);
     border-style: solid;
     border-radius: 3%;
@@ -36,28 +59,28 @@
 .pure-g{
     display: inline-flex;
     flex-flow: nowrap;
+    justify-content: center;
 }
 
 .dot-container{
-    width: 3em;
-    height: 3em;
-    border: 0.3em solid transparent;
+    min-width: min-content;
+    border: min(0.6vw, 3px) solid transparent;
 }
 
 .dot {
-    height: 3em;
-    width: 3em;
+    width: var(--dot-size);
+    height: var(--dot-size);
     background-color: var(--color-background);
     border-radius: 50%;
     margin: 0;
 }
 
 .red-dot {
-    background-color: var(--color-2)
+    background-color: var(--player-1-color)
 }
 
 .yellow-dot {
-    background-color: var(--color-1)
+    background-color: var(--player-2-color)
 }
 
 @media (hover :hover){
@@ -66,11 +89,11 @@
     } 
 
     .red-dot:hover {
-        background-color: var(--color-2)
+        background-color: var(--player-1-color)
     }
     
     .yellow-dot:hover {
-        background-color: var(--color-1)
+        background-color: var(--player-2-color)
     }  
 }
 
@@ -85,43 +108,10 @@ body {
 
 a {
     color: var(--color-text);
+    text-decoration: none;
 }
 
 h1 {
-    padding-left: 0.6em;
-}
-
-/* Falling animation code -- Will figure out later*/
-.red-dot-anim{
-    height: 3em;
-    width: 3em;
-    border-radius: 50%;
-    margin: 0;
-    animation-name: drop;
-    animation-duration: 0.4s;
-}
-
-.yello-dot-anim{
-    height: 3em;
-    width: 3em;
-    background-color: #AF16DB;
-    border-radius: 50%;
-    margin: 0;
-    animation-name: drop;
-    animation-duration: 0.4s;
-}
-
-@keyframes drop{
-    0%	{margin-top: 5px; background-color:#93DB16;}
-    10%	{margin-top: 10px;}
-    20%	{margin-top: 15px;}
-    30%	{margin-top: 20px;}
-    40%	{margin-top: 25px;}
-    50%	{margin-top: 30px;}
-    60%	{margin-top: 35px;}
-    70%	{margin-top: 40px;}
-    80%	{margin-top: 45px;}
-    90%	{margin-top: 50px;}
-    100%{margin-top: 55px; background-color:white;} 
-
+    padding: 0.6em;
+    margin: 0%;
 }

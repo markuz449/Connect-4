@@ -5,8 +5,8 @@ import wasmInit, {
   players_choice
 } from "./pkg/Connect4.js";
 
-let jsonGame;
-let stringGame;
+var jsonGame;
+var stringGame;
 
 // Create Connection to server
 var socket = io.connect('/');
@@ -26,6 +26,9 @@ const runWasm = async () => {
 };
 runWasm();
 
+
+/********** Game Functions -- Private **********/
+
 // Sends the players move to the server if it is their turn
 function players_move(choice_num){
   if (game_id != null && jsonGame.current_player == player_num){
@@ -34,14 +37,13 @@ function players_move(choice_num){
       document.getElementById("current_player").innerHTML = "Opponents turn";
       document.getElementById("timer").classList.add("invis");
       clear_timeouts();
-      console.log("I made the move: " + choice_num)
     }
   }
 }
 
 function update_board(choice_num){
-  let col_index = 6;
-  let placement = 6 * col_index + choice_num;
+  var col_index = 6;
+  var placement = 6 * col_index + choice_num;
   for (col_index; col_index > 0; col_index--){
     let id_check = "board_" + placement;
 
@@ -81,6 +83,7 @@ function player_swap(){
 
 // Displays who the winner is
 function game_over(){
+  console.log("Game Over");
   clear_timeouts();
   var winner_text_id = "game_over_text";
   if (jsonGame.winner == -1){
@@ -108,29 +111,59 @@ function restart_game(){
     if (jsonGame.winner != null){
       if (jsonGame.winner != 0){
         socket.emit('play_again', {game_id: game_id, user_id: user_id});
-      }
 
-      document.getElementById("player_info").classList.remove("invis");
-      document.getElementById("timer").classList.add("invis");
-      document.getElementById("game_over").classList.add("invis");
-      document.getElementById("play_again").classList.add("invis");
+        document.getElementById("player_info").classList.remove("invis");
+        document.getElementById("timer").classList.add("invis");
+        document.getElementById("game_over").classList.add("invis");
+        document.getElementById("play_again").classList.add("invis");
 
-      clear_game();
-      runWasm();
+        clear_game();
+        runWasm();
+      }      
     } else{
       console.log("There is a game in progress...");
     }
   }
 }
 
-// Takes the users input and grabs the column number as their move
-window.move = (column_num) => {
-  let choice_num = parseInt(column_num.getAttribute("data-column"));
-  players_move(choice_num);
+// Clears the game
+function clear_game(){
+  game_id = null;
+  player_num = null;
+
+  for (let clear_board = 1; clear_board <= 42; clear_board++){
+    let id_check = "board_" + clear_board;
+    document.getElementById(id_check).className = "dot";
+  }
 }
 
-window.play_again = () => {
-  restart_game();
+// Handles how much time a user has to make their move
+function move_timer(){
+  var timer = document.getElementById("timer");
+  var seconds_elapsed = 1000;
+  for (let time = move_time_limit; time >= 0; time--){
+    timeouts.push(setTimeout(function(){timer.innerHTML = time }, seconds_elapsed));
+    seconds_elapsed += 1000;
+  }
+
+  timeouts.push(setTimeout(player_timeout, ((1000 * move_time_limit) + 1000)));
+}
+
+function player_timeout(){
+  if (jsonGame.winner == 0){
+    socket.emit('timeout', {user_id: user_id, game_id: game_id});
+    jsonGame.winner = -4;
+    game_over();
+  }
+}
+
+function clear_timeouts(){
+  for (let i = 0; i < timeouts.length; i++) {
+    clearTimeout(timeouts[i]);
+  }
+  while (timeouts.length) {
+    timeouts.pop();
+  }
 }
 
 // Prints athe status of the game 
@@ -142,45 +175,21 @@ function game_status(){
   console.log("Player num: " + player_num);
 }
 
-// Clears the game
-function clear_game(){
-  user_id = null;
-  game_id = null;
-  player_num = null;
 
-  let clear_board = 1;
-  for (clear_board; clear_board <= 42; clear_board++){
-    let id_check = "board_" + clear_board;
-    document.getElementById(id_check).className = "dot";
-  }
+/********** Window interactions -- public**********/
+
+// Takes the users input and grabs the column number as their move
+window.move = (column_num) => {
+  let choice_num = parseInt(column_num.getAttribute("data-column"));
+  players_move(choice_num);
 }
 
-// Handles how much time a user has to make their move
-function move_timer(){
-  var timer = document.getElementById("timer");
-  let seconds_elapsed = 1000;
-  for (let time = move_time_limit; time >= 0; time--){
-    timeouts.push(setTimeout(function(){timer.innerHTML = time }, seconds_elapsed));
-    seconds_elapsed += 1000;
-  }
-
-  timeouts.push(setTimeout(player_timeout, ((1000 * move_time_limit) + 1000)));
+window.play_again = () => {
+  restart_game();
 }
 
-function player_timeout(){
-  socket.emit('timeout', {user_id: user_id, game_id: game_id});
-  jsonGame.winner = -4;
-  game_over();
-}
 
-function clear_timeouts(){
-  for (var i=0; i<timeouts.length; i++) {
-    clearTimeout(timeouts[i]);
-  }
-  while (timeouts.length) {
-    timeouts.pop();
-  }
-}
+/********** Socket functions -- Interactions with the server **********/
 
 socket.on('new_player', (data) => {
   restart_game();
@@ -201,7 +210,7 @@ socket.on('new_game', (data) => {
     document.getElementById("current_player").innerHTML = "Opponents turn";
     document.getElementById("timer").classList.add("invis");
   }
-  console.log("Game start")
+  console.log("Game start");
   game_status();
 });
 
@@ -209,18 +218,14 @@ socket.on('opponents_move', (data) => {
   if (data.game_id == game_id){
     if(jsonGame.current_player != player_num){
       update_board(data.choice);
-      document.getElementById("current_player").innerHTML = "Your turn";
-      document.getElementById("timer").innerHTML = move_time_limit;
-      document.getElementById("timer").classList.remove("invis");
-      move_timer();
-      console.log("Recieved opponenets move: " + data.choice);
+      if (jsonGame.winner == 0){
+        document.getElementById("current_player").innerHTML = "Your turn";
+        document.getElementById("timer").innerHTML = move_time_limit;
+        document.getElementById("timer").classList.remove("invis");
+        move_timer();
+      }
     }
   }
-});
-
-socket.on('disconnect', () =>{
-  clear_game();
-  runWasm();
 });
 
 socket.on('forfeit_win', () => {
