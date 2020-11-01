@@ -15,6 +15,7 @@ var game_id;
 var player_num;
 var move_time_limit = 12;
 var timeouts = [];
+var online_num = 0;
 
 const runWasm = async () => {
   // Instantiate our wasm module
@@ -22,6 +23,7 @@ const runWasm = async () => {
 
   stringGame = start();
   jsonGame = JSON.parse(stringGame);
+  document.getElementById("online_num").innerHTML = online_num;
   document.getElementById("current_player").innerHTML = "Searching for opponent..."
 };
 runWasm();
@@ -83,7 +85,7 @@ function player_swap(){
 
 // Displays who the winner is
 function game_over(){
-  console.log("Game Over");
+  //console.log("Game Over");
   clear_timeouts();
   var winner_text_id = "game_over_text";
   if (jsonGame.winner == -1){
@@ -121,7 +123,7 @@ function restart_game(){
         runWasm();
       }      
     } else{
-      console.log("There is a game in progress...");
+      //console.log("There is a game in progress...");
     }
   }
 }
@@ -194,6 +196,8 @@ window.play_again = () => {
 socket.on('new_player', (data) => {
   restart_game();
   user_id = data.user_id;
+  online_num = data.online_num;
+  document.getElementById("online_num").innerHTML = online_num;
 });
 
 socket.on('new_game', (data) => {
@@ -210,8 +214,8 @@ socket.on('new_game', (data) => {
     document.getElementById("current_player").innerHTML = "Opponents turn";
     document.getElementById("timer").classList.add("invis");
   }
-  console.log("Game start");
-  game_status();
+  //console.log("Game start");
+  //game_status();
 });
 
 socket.on('opponents_move', (data) => {
@@ -240,4 +244,9 @@ socket.on('timeout_win', () => {
     jsonGame.winner = -3;
     game_over();
   }
+});
+
+socket.on('update_online_num', (data) => {
+  online_num = data.online_num;
+  document.getElementById("online_num").innerHTML = online_num;
 });

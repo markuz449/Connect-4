@@ -8,9 +8,11 @@ var root = __dirname + "/public";
 
 var current_players = [];
 var current_games = [];
+var online_num;
 
-// Setting game timer
+// Setting timers
 var game_timer = setInterval(start_game, 3000);
+var online_num_update_timer = setInterval(update_online_num, 3000);
 
 // Parse application/json and application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -47,7 +49,7 @@ io.on('connection', (socket) => {
   var new_player = {user_id: socket.id, game_id: null};
   current_players.push(new_player);
   console.log("Current Players: " + current_players.length);
-  socket.emit('new_player', {user_id: socket.id});
+  socket.emit('new_player', {user_id: socket.id, online_num: current_players.length});
 
   // Listens if a player disconnects
   // Checks if they were in a game or not, if so, tell the opponent that they forfeited
@@ -178,6 +180,12 @@ function start_game(){
       }
     }
   }
+}
+
+// Sends through the number of current online players
+function update_online_num(){
+  online_num = current_players.length;
+  io.sockets.emit('update_online_num', {online_num: online_num});
 }
 
 
