@@ -10,7 +10,9 @@
   <p align="center">
     The simple game of Connect 4 that can be played online by different players
   </p>
-  <a align="center" href="https://marcusanderson.co.nz/connect-4">Play Here</a>
+  <p align="center">
+    <a href="https://marcusanderson.co.nz/connect-4">Play Here</a>
+  </p>
 </p>
 
 
