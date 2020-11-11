@@ -60,16 +60,16 @@ io.on('connection', (socket) => {
     if (remove_index > -1) {
       var disconnected_player = current_players[remove_index];
       
-      // Remove player from game and sends forfiet
+      // Remove player from game and sends opponent disconnect
       if (disconnected_player.game_id != null){
         let game_index = get_game_index(disconnected_player.game_id);
         console.log("Disconnecting from game: " + current_games[game_index].game_id);
         if(current_games[game_index].player1 == disconnected_player.user_id){
-          io.to(current_games[game_index].player2).emit('forfeit_win');
+          io.to(current_games[game_index].player2).emit('opponent_disconnect');
           current_games[game_index].player1 = null;
         } 
         else if(current_games[game_index].player2 == disconnected_player.user_id){
-          io.to(current_games[game_index].player1).emit('forfeit_win');
+          io.to(current_games[game_index].player1).emit('opponent_disconnect');
           current_games[game_index].player2 = null;
         }
         else {
@@ -103,30 +103,44 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Listens if the user wants to play again
-  // FUTURE -- set a timer so the same two clients can play each other again
-  socket.on('play_again', (data) => {
-    console.log("Play Again: User ID: " + data.user_id);
+  // Listens if the user wants to play against a new opponent
+  socket.on('new_opponent', (data) => {
+    console.log("New Opponent: User ID: " + data.user_id);
     var player_index = get_player_index(data.user_id);
     current_players[player_index].game_id = null;
 
     var game_index = get_game_index(data.game_id);
     var game = current_games[game_index];
 
-    //Sets their refrence in game to null
+    // Sets players refrence in game to null and sends disconnect to opponent
     if (game.player1 == data.user_id){
       game.player1 = null;
+      io.to(game.player2).emit('opponent_disconnect');
     } else{
       game.player2 = null;
+      io.to(game.player1).emit('opponent_disconnect');
     }
 
-    //If both clients have left, remove the game from the list
+    // If both players have left, remove the game from the list
     if (game.player1 == null && game.player2 == null){
       current_games.splice(game_index, 1);
       console.log("Removed a game via play_again(), current list: " + current_games);
     }
   });
 
+  // Listens if the player wants a rematch
+  socket.on('rematch', (data) => {
+    var game_index = get_game_index(data.game_id);
+    if (game_index >= 0){
+      current_game = current_games[game_index];
+      if (current_game.player1 == data.user_id){
+        io.to(current_game.player2).emit('opponent_rematch');
+      } else{
+        io.to(current_game.player1).emit('opponent_rematch');
+      }
+    }
+  });
+  
   // Listens if the opponent doesn't make a move in time
   socket.on('timeout', (data) => {
     console.log("Timeout from: " + data.user_id);
@@ -143,7 +157,7 @@ io.on('connection', (socket) => {
 
 });
 
-/** Timed Functions that get called every 3 seconds */
+/*** Timed Functions that get called every 3 seconds ***/
 // Checks if a game should start
 function start_game(){
   // Generates a new game between two different players
@@ -189,7 +203,7 @@ function update_online_num(){
 }
 
 
-/* Supporting functions */
+/*** Supporting functions ***/
 function get_game_index(game_id){
   var game_index = -1;
   for (let i = 0; i < current_games.length; i++){

@@ -28,7 +28,7 @@
 
         <div id="player_info" class="center text-spacing">
           <!--Make this better and be a grid or some shit-->
-          <p id="current_player" style="display: inline-block;"></p>
+          <p id="current_player" style="display: inline-block;">Searching for opponent...</p>
           <p id="timer" style="display: inline-block;"></p>
         </div>
 
@@ -92,12 +92,11 @@
           </div>
         </div>
 
-        <div class="center">
-          <div id="game_over" class="invis text-spacing">
-            <p id="game_over_text">Game Ongoing</p>
-          </div>
-          <div id="play_again" class="invis">
-            <button class="pure-button pure-button-primary" onclick="play_again()">Play Again?</button>
+        <div id="game_over" class="invis center">
+          <p id="game_over_text" class="text-spacing">Game Ongoing</p>
+          <div id="play_again">
+            <button id="rematch_button" class="pure-button pure-button-primary" onclick="rematch()">Rematch</button>
+            <button class="pure-button pure-button-primary" onclick="new_match()">New Opponent</button>
           </div>
         </div>
       </div>

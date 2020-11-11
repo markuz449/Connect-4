@@ -16,6 +16,8 @@ var player_num;
 var move_time_limit = 12;
 var timeouts = [];
 var online_num = 0;
+var rematch_num = 0;
+var rematch_sent = false;
 
 const runWasm = async () => {
   // Instantiate our wasm module
@@ -24,7 +26,6 @@ const runWasm = async () => {
   stringGame = start();
   jsonGame = JSON.parse(stringGame);
   document.getElementById("online_num").innerHTML = online_num;
-  document.getElementById("current_player").innerHTML = "Searching for opponent..."
 };
 runWasm();
 
@@ -104,34 +105,67 @@ function game_over(){
 
   document.getElementById("player_info").classList.add("invis");
   document.getElementById("game_over").classList.remove("invis");
-  document.getElementById("play_again").classList.remove("invis");
 }
 
-// Resets the game and starts again
-function restart_game(){
-  if (jsonGame != null){
-    if (jsonGame.winner != null){
-      if (jsonGame.winner != 0){
-        socket.emit('play_again', {game_id: game_id, user_id: user_id});
+// Resets the game for the user and waits for a new match
+function new_match(){
+  if (jsonGame.winner != 0){
+    socket.emit('new_opponent', {game_id: game_id, user_id: user_id});
+    document.getElementById("current_player").innerHTML = "Searching for opponent..."
 
-        document.getElementById("player_info").classList.remove("invis");
-        document.getElementById("timer").classList.add("invis");
-        document.getElementById("game_over").classList.add("invis");
-        document.getElementById("play_again").classList.add("invis");
+    document.getElementById("player_info").classList.remove("invis");
+    document.getElementById("timer").classList.add("invis");
+    document.getElementById("game_over").classList.add("invis");
+    document.getElementById("rematch_button").style.display = "inline";
 
-        clear_game();
-        runWasm();
-      }      
-    } else{
-      //console.log("There is a game in progress...");
+    game_id = null;
+    player_num = null;
+    clear_game();
+    runWasm();
+  }      
+}
+
+// Sends opponent rematch and resets if both players want a rematch
+function rematch_request(){
+  if (jsonGame.winner != 0){
+    if (rematch_sent == false){
+      socket.emit('rematch', {user_id: user_id, game_id: game_id});
+      rematch_sent = true;
+      rematch_num += 1;
+      document.getElementById("rematch_button").innerHTML = "Rematch (" + rematch_num + ")";
     }
+    if (rematch_num >= 2){
+      start_rematch();
+    }
+  }
+}
+
+// Resets the game for a rematch
+function start_rematch(){
+  document.getElementById("player_info").classList.remove("invis");
+  document.getElementById("timer").classList.add("invis");
+  document.getElementById("game_over").classList.add("invis");
+  document.getElementById("rematch_button").style.display = "inline";
+  
+  clear_game();
+  runWasm();
+
+  if (player_num == 1){
+    document.getElementById("current_player").innerHTML = "Your turn";
+    document.getElementById("timer").innerHTML = move_time_limit;
+    document.getElementById("timer").classList.remove("invis");
+    move_timer();
+  } else{
+    document.getElementById("current_player").innerHTML = "Opponents turn";
+    document.getElementById("timer").classList.add("invis");
   }
 }
 
 // Clears the game
 function clear_game(){
-  game_id = null;
-  player_num = null;
+  rematch_num = 0;
+  rematch_sent = false;
+  document.getElementById("rematch_button").innerHTML = "Rematch"; 
 
   for (let clear_board = 1; clear_board <= 42; clear_board++){
     let id_check = "board_" + clear_board;
@@ -186,15 +220,19 @@ window.move = (column_num) => {
   players_move(choice_num);
 }
 
-window.play_again = () => {
-  restart_game();
+window.new_match = () => {
+  new_match();
+}
+
+window.rematch = () => {
+  rematch_request();
 }
 
 
 /********** Socket functions -- Interactions with the server **********/
 
 socket.on('new_player', (data) => {
-  restart_game();
+  //new_match();
   user_id = data.user_id;
   online_num = data.online_num;
   document.getElementById("online_num").innerHTML = online_num;
@@ -232,11 +270,22 @@ socket.on('opponents_move', (data) => {
   }
 });
 
-socket.on('forfeit_win', () => {
+socket.on('opponent_rematch', () => {
+  rematch_num += 1;
+  document.getElementById("rematch_button").innerHTML = "Rematch (" + rematch_num + ")";
+  if (rematch_num >= 2){
+    start_rematch();
+  }
+});
+
+socket.on('opponent_disconnect', () => {
+  document.getElementById("rematch_button").style.display = "none";
+
+  // Checks if they forfieted the game
   if (jsonGame.winner == 0){
     jsonGame.winner = -2;
     game_over();
-  }
+  } 
 });
 
 socket.on('timeout_win', () => {

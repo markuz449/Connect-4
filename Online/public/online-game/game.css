@@ -120,6 +120,12 @@
     visibility: hidden;
 }
 
+.pure-button{
+    display: inline;
+    margin-bottom: 2em;
+    min-width: 10em;
+}
+
 body {
     background-color: var(--color-background);
     color: var(--color-text);
