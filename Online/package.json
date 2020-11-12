@@ -9,10 +9,10 @@
     "express": "^4.17.1",
     "fs": "^0.0.1-security",
     "nodemon": "^2.0.4",
-    "pusher": "^3.0.1",
     "socket.io": "^2.3.0",
     "sys": "^0.0.1",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {},
   "scripts": {
