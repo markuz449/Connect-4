@@ -1,0 +1,4 @@
+Here is where logs will be stored from the game
+
+Example entry:
+{"message":"Player connected","level":"info","timestamp":"2145-12-05T23:41:34.686Z"}
