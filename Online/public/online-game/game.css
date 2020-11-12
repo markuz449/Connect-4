@@ -8,11 +8,6 @@
     --dot-size: max(4vw, 40px);
 }
 
-.content-body{
-    margin-left: 15%;
-    margin-right: 15%;
-}
-
 .header{
     padding-top: 0em;
 }
@@ -44,6 +39,12 @@
 .connect-4-header-text{
     padding: 1em;
     text-align: left;
+}
+
+@media only screen and (max-width: 470px){
+    .connect-4-header-text{
+        text-align: center;
+    }
 }
 
 .center {
@@ -116,14 +117,14 @@
     }  
 }
 
-.invis {
-    visibility: hidden;
-}
-
 .pure-button{
     display: inline;
     margin-bottom: 2em;
     min-width: 10em;
+}
+
+.invis {
+    visibility: hidden;
 }
 
 body {

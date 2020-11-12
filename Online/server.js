@@ -2,10 +2,11 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var errorHandler = require("errorhandler");
 var {v4: uuidv4 }  = require("uuid");
+var path = require("path");
 var {transports, createLogger, format} = require('winston');
 
 var app = express();
-var root = __dirname + "/public";
+var root = path.join(__dirname + "/public");
 
 var current_players = [];
 var current_games = [];
@@ -39,7 +40,7 @@ app.use(errorHandler({
 }));
 
 // Serve static files from directory
-app.use(express.static(root));
+app.use(express.static(root, {extensions:['html']}));
 
 // Open server on specified port
 console.log("Starting Express Server");
