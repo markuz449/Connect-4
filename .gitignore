@@ -2,6 +2,7 @@
 .vscode/
 target/
 Terminal/target/
-Online/local-game/target
-Online/online-game/target
+Online/public/local-game/target
+Online/public/online-game/target
 Online/node_modules
+Online/logs/Connect-4.log

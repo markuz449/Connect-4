@@ -9,7 +9,6 @@ var root = __dirname + "/public";
 
 var current_players = [];
 var current_games = [];
-var online_num;
 
 // Setting timers
 var game_timer = setInterval(start_game, 3000);
@@ -206,8 +205,7 @@ function start_game(){
 
 // Sends through the number of current online players
 function update_online_num(){
-  online_num = current_players.length;
-  io.sockets.emit('update_online_num', {online_num: online_num});
+  io.sockets.emit('update_online_num', {online_num: current_players.length});
 }
 
 
