@@ -3,7 +3,7 @@
 import wasmInit, {
   start,
   players_choice
-} from "./pkg/Connect4.js";
+} from "/js/pkg/Connect4.js";
 
 var jsonGame;
 var stringGame;
@@ -21,7 +21,7 @@ var rematch_sent = false;
 
 const runWasm = async () => {
   // Instantiate our wasm module
-  const rustWasm = await wasmInit("./pkg/Connect4_bg.wasm");
+  const rustWasm = await wasmInit("/js/pkg/Connect4_bg.wasm");
 
   stringGame = start();
   jsonGame = JSON.parse(stringGame);
