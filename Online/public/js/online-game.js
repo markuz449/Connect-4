@@ -27,9 +27,10 @@ const runWasm = async () => {
   stringGame = start();
   jsonGame = JSON.parse(stringGame);
   document.getElementById("online_num").innerHTML = online_num;
-  socket.emit('player-connect', {});
 };
+
 runWasm();
+socket.emit('player-connect', {});
 
 
 /********** Game Functions -- Private **********/
