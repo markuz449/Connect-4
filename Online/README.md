@@ -49,6 +49,7 @@ This version is different because it uses Rust generated Web Assembly to run the
 * [Wasm-bindgen](https://github.com/rustwasm/wasm-bindgen)
 * [Serde JSON](https://crates.io/crates/serde_json)
 * [Node.js](https://nodejs.org/en/)
+* [Winston](https://github.com/winstonjs)
 * [Socket.IO](https://socket.io/)
 * [Pure.CSS](https://purecss.io/)
 

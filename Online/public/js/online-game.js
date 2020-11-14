@@ -19,6 +19,7 @@ var online_num = 0;
 var rematch_num = 0;
 var rematch_sent = false;
 
+
 const runWasm = async () => {
   // Instantiate our wasm module
   const rustWasm = await wasmInit("/js/pkg/Connect4_bg.wasm");
@@ -26,6 +27,7 @@ const runWasm = async () => {
   stringGame = start();
   jsonGame = JSON.parse(stringGame);
   document.getElementById("online_num").innerHTML = online_num;
+  socket.emit('player-connect', {});
 };
 runWasm();
 

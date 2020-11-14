@@ -52,11 +52,14 @@ const io = require("socket.io")(server);
 
 // Listen on every connection
 io.on('connection', (socket) => {
-  logger.info({message:('New player connected: ' + socket.id)});
-  var new_player = {user_id: socket.id, game_id: null};
-  current_players.push(new_player);
-  logger.info({message:("Current Players: " + current_players.length)});
-  socket.emit('new_player', {user_id: socket.id, online_num: current_players.length});
+  // Listens for when the player connects
+  socket.on('player-connect', () => {
+    logger.info({message:('New player connected: ' + socket.id)});
+    var new_player = {user_id: socket.id, game_id: null};
+    current_players.push(new_player);
+    logger.info({message:("Current Players: " + current_players.length)});
+    socket.emit('new_player', {user_id: socket.id, online_num: current_players.length});
+  });
 
   // Listens if a player disconnects
   // Checks if they were in a game or not, if so, tell the opponent that they forfeited
