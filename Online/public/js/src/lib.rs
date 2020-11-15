@@ -7,15 +7,10 @@ mod game;
 
 // Starts Connect 4
 #[wasm_bindgen]
-pub fn start() -> String{
+pub fn start(starting_player: usize) -> String{
     let mut game = Game::new_game();
-    let coin_flip = 1;
     
-    if coin_flip == 1{
-        game.current_player = 1;
-    } else{
-        game.current_player = 2;
-    }
+    game.current_player = starting_player;
     
     let json_game = serde_json::to_string(&game).unwrap();
     return json_game

@@ -3,7 +3,7 @@
 import wasmInit, {
   start,
   players_choice
-} from "/js/pkg/Connect4.js";
+} from "/js/pkg/connect4.js";
 
 var jsonGame;
 var stringGame;
@@ -19,17 +19,16 @@ var online_num = 0;
 var rematch_num = 0;
 var rematch_sent = false;
 
-
-const runWasm = async () => {
+const runWasm = async (start_player) => {
   // Instantiate our wasm module
-  const rustWasm = await wasmInit("/js/pkg/Connect4_bg.wasm");
+  const rustWasm = await wasmInit("/js/pkg/connect4_bg.wasm");
 
-  stringGame = start();
+  stringGame = start(start_player);
   jsonGame = JSON.parse(stringGame);
   document.getElementById("online_num").innerHTML = online_num;
 };
 
-runWasm();
+runWasm(0);
 socket.emit('player-connect', {});
 
 
@@ -151,9 +150,11 @@ function start_rematch(){
   document.getElementById("rematch_button").style.display = "inline";
   
   clear_game();
-  runWasm();
+  clear_timeouts();
+  player_swap();
+  runWasm(jsonGame.current_player);
 
-  if (player_num == 1){
+  if (jsonGame.current_player == player_num){
     document.getElementById("current_player").innerHTML = "Your turn";
     document.getElementById("timer").innerHTML = move_time_limit;
     document.getElementById("timer").classList.remove("invis");
@@ -205,7 +206,7 @@ function clear_timeouts(){
   }
 }
 
-// Prints athe status of the game 
+// Prints the status of the game 
 function game_status(){
   console.log("Game Status:");
   console.log("User ID: " + user_id);

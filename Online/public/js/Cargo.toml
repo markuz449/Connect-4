@@ -1,8 +1,10 @@
 [package]
-name = "Connect4"
+name = "connect4"
 version = "0.1.0"
 authors = ["Marcus Anderson"]
 edition = "2018"
+repository = "https://github.com/markuz449/Connect-4"
+description = "Connect 4 game code that needs to be compiled into web assembly for online game"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

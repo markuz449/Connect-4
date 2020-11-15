@@ -111,7 +111,7 @@ The main code of the gameplay is hardcoded to be a 7 by 6 board. If you wanted t
 To recompile the Rust code to Wasm run:
 
 ```sh
-rust-wasm build --target web
+wasm-pack build --target web
 ```
 You will also need to change the game.html and game.js files to represent how many columns and rows your new game will have. 
 

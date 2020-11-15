@@ -17,6 +17,10 @@
     height: auto;
 }
 
+.connect-4-header-container{
+    display: contents;
+}
+
 .connect-4-header{
     display: inline-flex;
     flex-wrap: wrap;
