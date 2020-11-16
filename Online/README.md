@@ -62,18 +62,21 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-* Node.js
+The prerequisites in this README are assuming you are running an RPM-based unix distribution. If you aren't just click on the items and follow their instructions for your system
+
+* [Node.js](https://nodejs.org/en/download)
 ```sh
 sudo dnf install node
 ```
-If you are not running a RPM-based linux distrabution follow the directions [here](https://nodejs.org/en/download) to install Node
 
-1. [rustup](https://rustup.rs/)
+To build the online game you are going to need to install these two in order
+
+* 1. [Rustup](https://rustup.rs/)
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-2. [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
+* 2. [Wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
 ```sh
 curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 ```
