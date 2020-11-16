@@ -68,6 +68,16 @@ sudo dnf install node
 ```
 If you are not running a RPM-based linux distrabution follow the directions [here](https://nodejs.org/en/download) to install Node
 
+1. [rustup](https://rustup.rs/)
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+2. [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
+```sh
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+```
+
 
 ### Installation
  
@@ -83,11 +93,26 @@ cd Online
 ```sh
 npm install
 ```
-4. Run the Node server
+4. Navigate to Game folder
+```sh
+cd public/js
+```
+
+5. Build the web-assembly game (This may take a while so grab a coffee)
+```sh
+wasm-pack build --target web
+```
+
+6. Navigate back to root
+```sh
+cd ../../
+```
+
+7. Run the Node server
 ```sh
 node server.js
 ```
-5. Play the game on you browser
+8. Play the game on you browser
 ```sh
 localhost:6969
 ```

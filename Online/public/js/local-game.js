@@ -3,22 +3,24 @@
 import wasmInit, {
   start,
   players_choice
-} from "/js/pkg/Connect4.js";
+} from "/js/pkg/connect4.js";
 
 let jsonGame;
 let stringGame;
 
 const runWasm = async () => {
   // Instantiate our wasm module
-  const rustWasm = await wasmInit("/js/pkg/Connect4_bg.wasm");
+  const rustWasm = await wasmInit("/js/pkg/connect4_bg.wasm");
 
-  stringGame = start();
-  jsonGame = JSON.parse(stringGame);
   let player_start = (Math.round(Math.random())) + 1;
-  jsonGame.current_player = player_start;
+  stringGame = start(player_start);
+  jsonGame = JSON.parse(stringGame);
   document.getElementById("current_player").innerHTML = "Current Player: " + jsonGame.current_player;
 };
 runWasm();
+
+
+/********** Game Functions -- Private **********/
 
 // The new player function
 function players_move(choice_num){
@@ -62,7 +64,6 @@ function player_swap(){
 
 // Displays who the winner is
 function game_over(){
-
   var winner_text_id = "game_over_text";
   if (jsonGame.winner == 1){
     document.getElementById(winner_text_id).innerHTML = "Player 1 Wins";
@@ -80,7 +81,6 @@ function game_over(){
 // Resets the game and starts again
 function restart_game(){
   if (jsonGame.winner != null){
-
     document.getElementById("player_info").classList.remove("invis");
     document.getElementById("game_over").classList.add("invis");
     document.getElementById("play_again").classList.add("invis");
@@ -92,6 +92,18 @@ function restart_game(){
   }
 }
 
+// Clears the game
+function clear_game(){
+  let clear_board = 1;
+  for (clear_board; clear_board <= 42; clear_board++){
+    let id_check = "board_" + clear_board;
+    document.getElementById(id_check).className = "dot";
+  }
+}
+
+
+/********** Window interactions -- public**********/
+
 // Takes the users input and grabs the column number as their move
 window.move = (column_num) => {
   let choice_num = parseInt(column_num.getAttribute("data-column"));
@@ -100,14 +112,4 @@ window.move = (column_num) => {
 
 window.play_again = () => {
   restart_game();
-}
-
-// Clears the game
-function clear_game(){
-
-  let clear_board = 1;
-  for (clear_board; clear_board <= 42; clear_board++){
-    let id_check = "board_" + clear_board;
-    document.getElementById(id_check).className = "dot";
-  }
 }
