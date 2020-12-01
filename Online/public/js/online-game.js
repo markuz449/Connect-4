@@ -10,7 +10,7 @@ var stringGame;
 
 // Create Connection to server
 var socket = io.connect('/');
-var user_id;
+var player_id;
 var game_id;
 var player_num;
 var move_time_limit = 12;
@@ -29,7 +29,7 @@ const runWasm = async (start_player) => {
 };
 
 runWasm(0);
-socket.emit('player-connect', {});
+socket.emit('player_connect', {});
 
 
 /********** Game Functions -- Private **********/
@@ -38,7 +38,7 @@ socket.emit('player-connect', {});
 function players_move(choice_num){
   if (game_id != null && jsonGame.current_player == player_num){
     if(update_board(choice_num)){
-      socket.emit('players_choice', {choice : choice_num, game_id: game_id});
+      socket.emit('players_choice', {player_id: player_id, game_id: game_id, choice : choice_num});
       document.getElementById("current_player").innerHTML = "Opponents turn";
       document.getElementById("timer").classList.add("invis");
       clear_timeouts();
@@ -112,7 +112,7 @@ function game_over(){
 // Resets the game for the user and waits for a new match
 function new_match(){
   if (jsonGame.winner != 0){
-    socket.emit('new_opponent', {game_id: game_id, user_id: user_id});
+    socket.emit('new_opponent', {game_id: game_id, player_id: player_id});
     document.getElementById("current_player").innerHTML = "Searching for opponent..."
 
     document.getElementById("player_info").classList.remove("invis");
@@ -131,7 +131,7 @@ function new_match(){
 function rematch_request(){
   if (jsonGame.winner != 0){
     if (rematch_sent == false){
-      socket.emit('rematch', {user_id: user_id, game_id: game_id});
+      socket.emit('rematch', {player_id: player_id, game_id: game_id});
       rematch_sent = true;
       rematch_num += 1;
       document.getElementById("rematch_button").innerHTML = "Rematch (" + rematch_num + ")";
@@ -191,7 +191,7 @@ function move_timer(){
 
 function player_timeout(){
   if (jsonGame.winner == 0){
-    socket.emit('timeout', {user_id: user_id, game_id: game_id});
+    socket.emit('timeout', {player_id: player_id, game_id: game_id});
     jsonGame.winner = -4;
     game_over();
   }
@@ -209,7 +209,7 @@ function clear_timeouts(){
 // Prints the status of the game 
 function game_status(){
   console.log("Game Status:");
-  console.log("User ID: " + user_id);
+  console.log("User ID: " + player_id);
   console.log("Current Game: " + game_id);
   console.log("Current Player: " + jsonGame.current_player);
   console.log("Player num: " + player_num);
@@ -237,7 +237,7 @@ window.rematch = () => {
 
 socket.on('new_player', (data) => {
   //new_match();
-  user_id = data.user_id;
+  player_id = data.player_id;
   online_num = data.online_num;
   document.getElementById("online_num").innerHTML = online_num;
 });
@@ -261,15 +261,13 @@ socket.on('new_game', (data) => {
 });
 
 socket.on('opponents_move', (data) => {
-  if (data.game_id == game_id){
-    if(jsonGame.current_player != player_num){
-      update_board(data.choice);
-      if (jsonGame.winner == 0){
-        document.getElementById("current_player").innerHTML = "Your turn";
-        document.getElementById("timer").innerHTML = move_time_limit;
-        document.getElementById("timer").classList.remove("invis");
-        move_timer();
-      }
+  if(jsonGame.current_player != player_num){
+    update_board(data.choice);
+    if (jsonGame.winner == 0){
+      document.getElementById("current_player").innerHTML = "Your turn";
+      document.getElementById("timer").innerHTML = move_time_limit;
+      document.getElementById("timer").classList.remove("invis");
+      move_timer();
     }
   }
 });
