@@ -29,6 +29,7 @@ const runWasm = async (start_player) => {
 };
 
 runWasm(0);
+console.log(sessionStorage.getItem("player_id"));
 socket.emit('player_connect', {});
 
 
@@ -209,7 +210,7 @@ function clear_timeouts(){
 // Prints the status of the game 
 function game_status(){
   console.log("Game Status:");
-  console.log("User ID: " + player_id);
+  console.log("Player ID: " + player_id);
   console.log("Current Game: " + game_id);
   console.log("Current Player: " + jsonGame.current_player);
   console.log("Player num: " + player_num);

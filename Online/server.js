@@ -133,9 +133,6 @@ io.on('connection', (socket) => {
     var player1 = current_games[game_index].player1;
     var player2 = current_games[game_index].player2;
 
-    console.log("Player 1: " + player1 + ", ID: " + player1.player_id);
-    console.log("Data ID: " + data.player_id);
-
     // Sets players refrence in game to null and sends disconnect to opponent
     if (player1.player_id == data.player_id){
       player1.game_id = null;
