@@ -52,23 +52,25 @@ const io = require("socket.io")(server);
 
 // Listen on every connection
 io.on('connection', (socket) => {
-  console.log(socket.id);
-  var player_id = uuidv4();
-  socket.emit('new_player_id', {player_id: player_id});
+  logger.info({message: ("Socket: " + socket.id + " connected")});
+
+  // Listens for when player requests a player_id
+  socket.on('generate_player_id', () => {
+    socket.emit('new_player_id', {player_id: uuidv4()});
+  });
 
   // Listens for when the player connects
-  socket.on('player_connect', () => {
-    logger.info({message:('New player connected: ' + player_id)});
-    var new_player = {socket_id: socket.id, player_id: player_id, game_id: null};
+  socket.on('player_connect', (data) => {
+    logger.info({message:('New player connected: ' + data.player_id)});
+    var new_player = {socket_id: socket.id, player_id: data.player_id, game_id: null};
     current_players.push(new_player);
     logger.info({message:("Current Players: " + current_players.length)});
-    socket.emit('new_player', {player_id: player_id, online_num: current_players.length});
   });
 
   // Listens if a player disconnects
   // Checks if they were in a game or not, if so, tell the opponent that they forfeited
   socket.on('disconnect', () => {
-    logger.info({message:("Socket: " + socket.id + " disconnecting...")});
+    logger.info({message:("Socket: " + socket.id + " disconnecting")});
     var remove_index = get_socket_index(socket.id);
 
     if (remove_index > -1) {
@@ -125,7 +127,7 @@ io.on('connection', (socket) => {
 
   // Listens if the user wants to play against a new opponent
   socket.on('new_opponent', (data) => {
-    logger.info({message:("New Opponent: User ID: " + data.player_id)});
+    logger.info({message:("New Opponent: Player ID: " + data.player_id)});
     var player_index = get_player_index(data.player_id);
     current_players[player_index].game_id = null;
 
@@ -155,7 +157,7 @@ io.on('connection', (socket) => {
 
   // Listens if the player wants a rematch
   socket.on('rematch', (data) => {
-    logger.info({message:("Rematch request: User ID: " + data.player_id)});
+    logger.info({message:("Rematch request: Player ID: " + data.player_id)});
     var game_index = get_game_index(data.game_id);
     if (game_index >= 0){
       var player1 = current_games[game_index].player1;
@@ -250,14 +252,14 @@ function get_game_index(game_id){
 }
 
 function get_socket_index(socket_id){
-  var player_index = -1;
+  var socket_index = -1;
   for (let i = 0; i < current_players.length; i++){
     if ((current_players[i].socket_id == socket_id) && (current_players[i].player_id != null)){
-      player_index = i;
+      socket_index = i;
       break;
     }
   }
-  return player_index;
+  return socket_index;
 }
 
 function get_player_index(player_id){
@@ -267,6 +269,9 @@ function get_player_index(player_id){
       player_index = i;
       break;
     }
+  }
+  if (player_index == -1){
+    logger.error({message:("Error in getting player-index")});
   }
   return player_index;
 }

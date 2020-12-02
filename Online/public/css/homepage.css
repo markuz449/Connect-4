@@ -44,9 +44,7 @@
 }
 
 .pure-button{
-    max-width: 12em;
-    padding-left: 3em;
-    padding-right: 3em;
+    min-width: 12em;
     padding-top: 0.8em;
     padding-bottom: 0.8em;
 }

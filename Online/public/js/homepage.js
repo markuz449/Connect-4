@@ -4,6 +4,12 @@ var socket = io.connect('/');
 var private_menu_display = false;
 var join_menu_display = false;
 
+
+if (sessionStorage.getItem("player_id") == null){
+    console.log("Request new id");
+    socket.emit('generate_player_id');
+}
+
 /********** Functions -- Private **********/
 
 function private_game_menu(){
@@ -42,14 +48,9 @@ function join_game(form){
 /********** Socket functions -- Interactions with the server **********/
 
 socket.on('new_player_id', (data) => {
-    console.log(data.player_id);
-    if (sessionStorage.getItem("player_id") == null){
-        sessionStorage.setItem("player_id", data.player_id);
-        console.log(sessionStorage.getItem("player_id"));
-    }
+    sessionStorage.setItem("player_id", data.player_id);
 });
 
 socket.on('update_online_num', (data) => {
-    online_num = data.online_num;
-    document.getElementById("online_num").innerHTML = online_num;
+    document.getElementById("online_num").innerHTML = data.online_num;
 });

@@ -29,8 +29,14 @@ const runWasm = async (start_player) => {
 };
 
 runWasm(0);
-console.log(sessionStorage.getItem("player_id"));
-socket.emit('player_connect', {});
+
+if (sessionStorage.getItem("player_id") == null){
+  socket.emit('generate_player_id');
+} else{
+  player_id = sessionStorage.getItem("player_id");
+}
+
+socket.emit('player_connect', {player_id: player_id});
 
 
 /********** Game Functions -- Private **********/
@@ -236,11 +242,8 @@ window.rematch = () => {
 
 /********** Socket functions -- Interactions with the server **********/
 
-socket.on('new_player', (data) => {
-  //new_match();
-  player_id = data.player_id;
-  online_num = data.online_num;
-  document.getElementById("online_num").innerHTML = online_num;
+socket.on('new_player_id', (data) => {
+  sessionStorage.setItem("player_id", data.player_id);
 });
 
 socket.on('new_game', (data) => {
