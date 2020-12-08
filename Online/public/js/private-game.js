@@ -15,9 +15,9 @@ var game_id;
 var player_num;
 var move_time_limit = 12;
 var timeouts = [];
-var online_num = 0;
 var rematch_num = 0;
 var rematch_sent = false;
+var active = false;
 
 const runWasm = async (start_player) => {
   // Instantiate our wasm module
@@ -25,18 +25,26 @@ const runWasm = async (start_player) => {
 
   stringGame = start(start_player);
   jsonGame = JSON.parse(stringGame);
-  document.getElementById("online_num").innerHTML = online_num;
+
+  if (sessionStorage.getItem("player_id") == null){
+    socket.emit('generate_player_id');
+  } else{
+    player_id = sessionStorage.getItem("player_id");
+  }
+
+  if (active == false){
+    active = true;
+    if (sessionStorage.getItem("join_code") == null){
+      socket.emit('host_game', {player_id: player_id});
+    } else{
+      console.log("Starting Private Game");
+      var join_code = sessionStorage.getItem("join_code");
+      document.getElementById("join_code").innerHTML = join_code;
+      socket.emit('start_private_game', {player_id: player_id, join_code: join_code});
+    }
+  }
 };
-
 runWasm(0);
-
-if (sessionStorage.getItem("player_id") == null){
-  socket.emit('generate_player_id');
-} else{
-  player_id = sessionStorage.getItem("player_id");
-}
-
-socket.emit('player_connect', {player_id: player_id});
 
 
 /********** Game Functions -- Private **********/
@@ -53,11 +61,12 @@ function players_move(choice_num){
   }
 }
 
+// Updates the board with the players choice
 function update_board(choice_num){
   var col_index = 6;
   var placement = 6 * col_index + choice_num;
   for (col_index; col_index > 0; col_index--){
-    let id_check = "board_" + placement;
+    var id_check = "board_" + placement;
 
     if (document.getElementById(id_check).className == "dot"){
       if (jsonGame.current_player == 1){
@@ -116,24 +125,6 @@ function game_over(){
   document.getElementById("game_over").classList.remove("invis");
 }
 
-// Resets the game for the user and waits for a new match
-function new_match(){
-  if (jsonGame.winner != 0){
-    socket.emit('new_opponent', {game_id: game_id, player_id: player_id});
-    document.getElementById("current_player").innerHTML = "Searching for opponent..."
-
-    document.getElementById("player_info").classList.remove("invis");
-    document.getElementById("timer").classList.add("invis");
-    document.getElementById("game_over").classList.add("invis");
-    document.getElementById("rematch_button").style.display = "inline";
-
-    game_id = null;
-    player_num = null;
-    clear_game();
-    runWasm();
-  }      
-}
-
 // Sends opponent rematch and resets if both players want a rematch
 function rematch_request(){
   if (jsonGame.winner != 0){
@@ -179,7 +170,7 @@ function clear_game(){
   document.getElementById("rematch_button").innerHTML = "Rematch"; 
 
   for (let clear_board = 1; clear_board <= 42; clear_board++){
-    let id_check = "board_" + clear_board;
+    var id_check = "board_" + clear_board;
     document.getElementById(id_check).className = "dot";
   }
 }
@@ -227,12 +218,8 @@ function game_status(){
 
 // Takes the users input and grabs the column number as their move
 window.move = (column_num) => {
-  let choice_num = parseInt(column_num.getAttribute("data-column"));
+  var choice_num = parseInt(column_num.getAttribute("data-column"));
   players_move(choice_num);
-}
-
-window.new_match = () => {
-  new_match();
 }
 
 window.rematch = () => {
@@ -247,9 +234,19 @@ socket.on('new_player_id', (data) => {
 });
 
 socket.on('new_game', (data) => {
+  // Reseting game if friend rejoins
+  if (game_id != null){
+    runWasm(data.start_player);
+    clear_game();
+    jsonGame.winner = 0;
+    document.getElementById("game_over").classList.add("invis");
+    document.getElementById("rematch_button").classList.remove("invis");
+  }
+
   game_id = data.game_id;
   player_num = data.start_player;
   jsonGame.current_player = 1;
+  jsonGame.winner = 0;
   // Sets oppopnent id and sets current player
   if (data.start_player == 1){
     document.getElementById("current_player").innerHTML = "Your turn";
@@ -285,13 +282,17 @@ socket.on('opponent_rematch', () => {
 });
 
 socket.on('opponent_disconnect', () => {
-  document.getElementById("rematch_button").style.display = "none";
+  console.log("OHHH DISCONEECCCCTTTTTTTTTTTTTTT");
+  document.getElementById("rematch_button").classList.add("invis");
 
   // Checks if they forfieted the game
   if (jsonGame.winner == 0){
     jsonGame.winner = -2;
     game_over();
   } 
+
+  document.getElementById("current_player").innerHTML = "Friend disconnected, waiting for friend to re-join...";
+  document.getElementById("player_info").classList.remove("invis");
 });
 
 socket.on('timeout_win', () => {
@@ -301,7 +302,6 @@ socket.on('timeout_win', () => {
   }
 });
 
-socket.on('update_online_num', (data) => {
-  online_num = data.online_num;
-  document.getElementById("online_num").innerHTML = online_num;
+socket.on('send_join_code', (data) => {
+  document.getElementById("join_code").innerHTML = data.join_code;
 });

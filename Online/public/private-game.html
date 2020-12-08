@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Connect 4 - Rust</title>
+    <title>Connect 4 | Private Game</title>
     
     <link rel="shortcut icon" href="assets/logo.png">
     <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
@@ -17,12 +17,20 @@
         <a class="connect-4-header-container" href="/">
           <div class="connect-4-header content-body">
             <img src="assets/logo.png" alt="Connect 4 Rust Logo" width="100px" height="100px">
-            <h1>Connect 4</h1>
+            <div class="connect-4-header-text">
+              <h1>Connect 4</h1>
+            </div>
           </div>
         </a>
 
+        <div class="center content-body">
+          <p style="display: inline-block;">Private Game Code: </p>
+          <p id="join_code" style="display: inline-block;"></p>
+        </div>
+
         <div id="player_info" class="center text-spacing content-body">
-          <p id="current_player" style="display: inline-block;"></p>
+          <p id="current_player" style="display: inline-block;">Waiting for friend...</p>
+          <p id="timer" style="display: inline-block;"></p>
         </div>
 
         <!--The Connect 4 Board-->
@@ -87,13 +95,14 @@
 
         <div id="game_over" class="invis center content-body">
           <p id="game_over_text" class="text-spacing">Game Ongoing</p>
-          <div id="play_again" class="invis">
-            <button class="pure-button pure-button-primary" onclick="play_again()">Play Again?</button>
+          <div id="play_again">
+            <button id="rematch_button" class="pure-button pure-button-primary" onclick="rematch()">Rematch</button>
           </div>
-        </div>  
-
+        </div>
+      
       </div>
     </div>
   </body>
-  <script type="module" src="js/local-game.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="js/private-game.js"></script>
 </html>

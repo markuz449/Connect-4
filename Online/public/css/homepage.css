@@ -3,10 +3,15 @@
     --color-text: #FFFFFF
 }
 
+.content-body{
+    margin-left: 8%;
+    margin-right: 8%;
+}
+
 .connect-4-logo{
     width: 15em; 
     height: 15em;
-    padding-top: 4em;
+    padding-top: 1.5em;
 }
 
 .center {
@@ -41,6 +46,7 @@
 
 .game-button-container{
     padding-bottom: 1em;
+    align-self: center;
 }
 
 .pure-button{
@@ -49,8 +55,21 @@
     padding-bottom: 0.8em;
 }
 
+.join-menu-container{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
 .hidden-menu{
     display: none;
+}
+
+.error-text{
+    color: red;
+    max-width: 20em;
+    text-align: center;
+    padding-bottom: 1em;
 }
 
 body {
@@ -66,12 +85,21 @@ p {
     margin: 0%;
 }
 
+
 /*** Media Changes ***/
 
 /* Tablets */
 @media (min-width: 480px){
+    .content-body{
+        margin-left: 12%;
+        margin-right: 12%;
+    }
 }
 
 /* Desktop */
 @media (min-width: 1024px){
+    .content-body{
+        margin-left: 15%;
+        margin-right: 15%;
+    }
 }

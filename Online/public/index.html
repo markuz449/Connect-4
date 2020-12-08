@@ -13,61 +13,71 @@
   <body>
     <script>0</script><!-- used to fix this bug FOUC (Flash Of Unstyled Content) on firefox-->
 
-    <div class="center">
-      <img src="assets/logo.png" alt="Connect 4 Rust Logo" class="connect-4-logo">
-      <h1>Connect 4 - Rust</h1>
+    <div id="page-container">
+      <div id="content-wrap">
+        <section class="center content-body">
+          <img src="assets/logo.png" alt="Connect 4 Rust Logo" class="connect-4-logo">
+          <h1>Connect 4 - Rust</h1>
 
-      <p class="welcome">Welcome to Connect 4 - Rust!</p>
-      <div class="paragraph">
-        <p class="small-text"><i>Select which type of game you want to play</i></p>
-        <div>
-          <p class="small-text online-num">Current Online Players:</p>
-          <p id="online_num" class="online-num small-text">0</p>
+          <p class="welcome">Welcome to Connect 4 - Rust!</p>
+          <div class="paragraph">
+            <p class="small-text"><i>Select which type of game you want to play</i></p>
+            <div>
+              <p class="small-text online-num">Current Online Players:</p>
+              <p id="online_num" class="online-num small-text">0</p>
+            </div>
+          </section>
+
+          <section class="game-menu-container content-body">
+            <!-- Start Menu -->
+            <section id="game_menu" class="game-menu">
+              <div class="game-button-container">
+                <a class="pure-button pure-button-primary" href="local-game">Local Game</a>
+              </div>
+
+              <div class="game-button-container">
+                <a class="pure-button pure-button-primary" href="public-game">Public Game</a>
+              </div>
+
+              <div class="game-button-container">
+                <button class="pure-button pure-button-primary" onclick="private_game_menu()">Private Game</button>
+              </div>
+            </section>
+            <!-- Private Menu -->
+            <section id="private_game_menu" class="game-menu hidden-menu">
+              <div class="game-button-container">
+                <a class="pure-button pure-button-primary" href="private-game">Host Game</a>
+              </div>
+
+              <div class="game-button-container">
+                <button class="pure-button pure-button-primary" onclick="join_game_menu()">Join Game</button>
+              </div>
+
+              <div class="game-button-container">
+                <button class="pure-button pure-button-primary" onclick="back()">Back</button>
+              </div>
+            </section>
+            <!-- Join Menu -->
+            <section id="join_game_menu" class="game-menu hidden-menu join-menu-container">
+              <div class="game-button-container">
+                <label for="join_game_input">Game Code:</label>
+                <input type="text" id="join_game_input" name="private_game_code" size="4" maxlength="5">
+              </div>
+
+              <p id="join_response" class="error-text hidden-menu">Error</p>
+
+              <div class="game-button-container">
+                <input type="button" for="join_game_input" class="pure-button pure-button-primary" value="Join" onclick="join_game()">
+              </div>
+
+              <div class="game-button-container">
+                <button class="pure-button pure-button-primary" onclick="back()">Back</button>
+              </div>
+            </section>
+          </section>
+
         </div>
       </div>
-
-      <section class="game-menu-container">
-        <!-- Start Menu -->
-        <section id="game-menu" class="game-menu">
-          <div class="game-button-container">
-            <a class="pure-button pure-button-primary" href="local-game">Local Game</a>
-          </div>
-          <div class="game-button-container">
-            <a class="pure-button pure-button-primary" href="public-game">Public Game</a>
-          </div>
-          <div class="game-button-container">
-            <button class="pure-button pure-button-primary" onclick="private_game_menu()">Private Game</button>
-          </div>
-        </section>
-        <!-- Private Menu -->
-        <section id="private-game-menu" class="hidden-menu game-menu">
-          <div class="game-button-container">
-            <a class="pure-button pure-button-primary" href="">Host Game</a>
-          </div>
-          <div class="game-button-container">
-            <button class="pure-button pure-button-primary" onclick="join_game_menu()">Join Game</button>
-          </div>
-          <div class="game-button-container">
-            <button class="pure-button pure-button-primary" onclick="back()">Back</button>
-          </div>
-        </section>
-        <!-- Join Menu -->
-        <section id="join-game-menu" class="hidden-menu game-menu">
-          <form name="join-private-game" action="" method="GET">
-            <div class="game-button-container">
-              <label for="join-game">Game Code:</label>
-              <input type="text" id="join-game" name="private_game_code" size="4" maxlength="5">
-            </div>
-            <div class="game-button-container">
-              <input type="button" for="join-game" class="pure-button pure-button-primary" value="Join" onclick="join_game(this.form)">
-            </div>
-          </form>
-          <div class="game-button-container">
-            <button class="pure-button pure-button-primary" onclick="back()">Back</button>
-          </div>
-        </section>
-      </section>
-
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/homepage.js"></script>
