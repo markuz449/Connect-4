@@ -270,7 +270,7 @@ io.on('connection', (socket) => {
   });
 
   // Listens for a user wanting to join a private game
-  socket.on('join_game', (data) => {
+  socket.on('check_join_code', (data) => {
     logger.info({message: "Joining player via join code: " + data.join_code});
     if (private_join_codes.includes(data.join_code)){
       socket.emit("accepted_join_code");

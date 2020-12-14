@@ -18,6 +18,7 @@ var timeouts = [];
 var rematch_num = 0;
 var rematch_sent = false;
 var active = false;
+var join_code = null;
 
 const runWasm = async (start_player) => {
   // Instantiate our wasm module
@@ -33,15 +34,9 @@ const runWasm = async (start_player) => {
   }
 
   if (active == false){
+    join_code = sessionStorage.getItem("join_code");
+    socket.emit('check_join_code', {join_code: join_code});
     active = true;
-    if (sessionStorage.getItem("join_code") == null){
-      socket.emit('host_game', {player_id: player_id});
-    } else{
-      console.log("Starting Private Game");
-      var join_code = sessionStorage.getItem("join_code");
-      document.getElementById("join_code").innerHTML = join_code;
-      socket.emit('start_private_game', {player_id: player_id, join_code: join_code});
-    }
   }
 };
 runWasm(0);
@@ -257,11 +252,12 @@ socket.on('new_game', (data) => {
     document.getElementById("current_player").innerHTML = "Opponents turn";
     document.getElementById("timer").classList.add("invis");
   }
-  //console.log("Game start");
-  //game_status();
+  console.log("Game start");
+  game_status();
 });
 
 socket.on('opponents_move', (data) => {
+  console.log("JSON Game Current Player on Opponent move: %s", jsonGame.current_player);
   if(jsonGame.current_player != player_num){
     update_board(data.choice);
     if (jsonGame.winner == 0){
@@ -304,4 +300,15 @@ socket.on('timeout_win', () => {
 
 socket.on('send_join_code', (data) => {
   document.getElementById("join_code").innerHTML = data.join_code;
+});
+
+socket.on('accepted_join_code', () => {
+  console.log("Starting Private Game");
+  document.getElementById("join_code").innerHTML = join_code;
+  socket.emit('start_private_game', {player_id: player_id, join_code: join_code});
+});
+
+socket.on('rejected_join_code', () => {
+  console.log("Hosting Game, stored join code: %s", join_code);
+  socket.emit('host_game', {player_id: player_id});
 });

@@ -42,7 +42,7 @@ function back(){
 function join_game(){
     join_code = document.getElementById("join_game_input").value;
     console.log(join_code);
-    socket.emit("join_game", {join_code: join_code});
+    socket.emit("check_join_code", {join_code: join_code});
 }
 
 
