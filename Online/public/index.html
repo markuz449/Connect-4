@@ -64,7 +64,10 @@
                 <input type="text" id="join_game_input" name="private_game_code" size="4" maxlength="5">
               </div>
 
-              <p id="join_response" class="error-text hidden-menu">Error</p>
+              <div id="join_response" class="error-text hidden-menu">
+                <p id="error_code">Error</p>
+                <p>Check that your code is correct</p>
+              </div>
 
               <div class="game-button-container">
                 <input type="button" for="join_game_input" class="pure-button pure-button-primary" value="Join" onclick="join_game()">

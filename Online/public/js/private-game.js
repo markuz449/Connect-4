@@ -46,7 +46,7 @@ runWasm(0);
 
 // Sends the players move to the server if it is their turn
 function players_move(choice_num){
-  if (game_id != null && jsonGame.current_player == player_num){
+  if (game_id != null && jsonGame.current_player == player_num && jsonGame.winner == 0){
     if(update_board(choice_num)){
       socket.emit('players_choice', {player_id: player_id, game_id: game_id, choice : choice_num});
       document.getElementById("current_player").innerHTML = "Opponents turn";
@@ -99,7 +99,7 @@ function player_swap(){
 
 // Displays who the winner is
 function game_over(){
-  //console.log("Game Over");
+  ////console.log("Game Over");
   clear_timeouts();
   var winner_text_id = "game_over_text";
   if (jsonGame.winner == -1){
@@ -201,11 +201,11 @@ function clear_timeouts(){
 
 // Prints the status of the game 
 function game_status(){
-  console.log("Game Status:");
-  console.log("Player ID: " + player_id);
-  console.log("Current Game: " + game_id);
-  console.log("Current Player: " + jsonGame.current_player);
-  console.log("Player num: " + player_num);
+  //console.log("Game Status:");
+  //console.log("Player ID: " + player_id);
+  //console.log("Current Game: " + game_id);
+  //console.log("Current Player: " + jsonGame.current_player);
+  //console.log("Player num: " + player_num);
 }
 
 
@@ -231,7 +231,7 @@ socket.on('new_player_id', (data) => {
 socket.on('new_game', (data) => {
   // Reseting game if friend rejoins
   if (game_id != null){
-    runWasm(data.start_player);
+    runWasm(1);
     clear_game();
     jsonGame.winner = 0;
     document.getElementById("game_over").classList.add("invis");
@@ -252,12 +252,12 @@ socket.on('new_game', (data) => {
     document.getElementById("current_player").innerHTML = "Opponents turn";
     document.getElementById("timer").classList.add("invis");
   }
-  console.log("Game start");
+  //console.log("Game start");
   game_status();
 });
 
 socket.on('opponents_move', (data) => {
-  console.log("JSON Game Current Player on Opponent move: %s", jsonGame.current_player);
+  //console.log("JSON Game Current Player on Opponent move: %s", jsonGame.current_player);
   if(jsonGame.current_player != player_num){
     update_board(data.choice);
     if (jsonGame.winner == 0){
@@ -278,7 +278,7 @@ socket.on('opponent_rematch', () => {
 });
 
 socket.on('opponent_disconnect', () => {
-  console.log("OHHH DISCONEECCCCTTTTTTTTTTTTTTT");
+  //console.log("OHHH DISCONEECCCCTTTTTTTTTTTTTTT");
   document.getElementById("rematch_button").classList.add("invis");
 
   // Checks if they forfieted the game
@@ -303,12 +303,12 @@ socket.on('send_join_code', (data) => {
 });
 
 socket.on('accepted_join_code', () => {
-  console.log("Starting Private Game");
+  //console.log("Starting Private Game");
   document.getElementById("join_code").innerHTML = join_code;
   socket.emit('start_private_game', {player_id: player_id, join_code: join_code});
 });
 
 socket.on('rejected_join_code', () => {
-  console.log("Hosting Game, stored join code: %s", join_code);
+  //console.log("Hosting Game, stored join code: %s", join_code);
   socket.emit('host_game', {player_id: player_id});
 });

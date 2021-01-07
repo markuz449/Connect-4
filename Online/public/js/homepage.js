@@ -6,7 +6,7 @@ var join_menu_display = false;
 var join_code;
 
 if (sessionStorage.getItem("player_id") == null){
-    console.log("Request new id");
+    //console.log("Request new id");
     socket.emit('generate_player_id');
 }
 
@@ -41,7 +41,7 @@ function back(){
 
 function join_game(){
     join_code = document.getElementById("join_game_input").value;
-    console.log(join_code);
+    //console.log(join_code);
     socket.emit("check_join_code", {join_code: join_code});
 }
 
@@ -57,17 +57,17 @@ socket.on('update_online_num', (data) => {
 });
 
 socket.on('accepted_join_code', () => {
-    console.log("Accepted Join Request");
+    //console.log("Accepted Join Request");
     sessionStorage.setItem("join_code", join_code);
     var current_location = window.location.href;
-    console.log("URL: " + current_location);
+    //console.log("URL: " + current_location);
     window.location.replace(current_location + "private-game");
 });
 
 socket.on('rejected_join_code', () => {
-    console.log("Rejected Join Request");
+    //console.log("Rejected Join Request");
     document.getElementById("join_response").classList.remove("hidden-menu");
-    var error_message = "Failed to Join with Game Code: " + join_code + ", Check that your code is correct!";
-    console.log(error_message)
-    document.getElementById("join_response").innerHTML = error_message;
+    var error_message = "Game Code: " + join_code + " is invalid";
+    //console.log(error_message)
+    document.getElementById("error_code").innerHTML = error_message;
 });
