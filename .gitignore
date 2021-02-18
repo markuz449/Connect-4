@@ -2,7 +2,9 @@
 .vscode/
 target/
 Terminal/target/
-Online/public/local-game/target
-Online/public/online-game/target
+Online/public/js/target
+Cargo.lock
+Terminal/Cargo.lock
+Online/public/js/Cargo.lock
 Online/node_modules
 Online/logs/
