@@ -19,7 +19,7 @@ pub fn start_game() {
     let mut game = Game::new_game();
 
     let mut rng = rand::thread_rng();
-    let coin_flip = rng.gen_range(1, 3);
+    let coin_flip = rng.gen_range(1..3);
 
     if coin_flip == 1 {
         game.current_player = 1;

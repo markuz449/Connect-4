@@ -3,8 +3,5 @@
 target/
 Terminal/target/
 Online/public/js/target
-Cargo.lock
-Terminal/Cargo.lock
-Online/public/js/Cargo.lock
 Online/node_modules
 Online/logs/
