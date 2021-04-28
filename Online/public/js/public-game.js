@@ -10,9 +10,8 @@ var stringGame;
 
 // Create Connection to server
 var socket = io.connect('/');
-var player_id;
 var game_id;
-var player_num;
+var current_player;
 var move_time_limit = 12;
 var timeouts = [];
 var online_num = 0;
@@ -27,16 +26,12 @@ const runWasm = async (start_player) => {
   stringGame = start(start_player);
   jsonGame = JSON.parse(stringGame);
   document.getElementById("online_num").innerHTML = online_num;
-
-  if (sessionStorage.getItem("player_id") == null){
-    socket.emit('generate_player_id');
-  } else{
-    player_id = sessionStorage.getItem("player_id");
-  }
   
+  // Adds the player to public queue
+  // Only triggers once per page load
   if (active == false){
     active = true;
-    socket.emit('player_connect', {player_id: player_id});
+    socket.emit('add_to_public_queue');
   }
 };
 runWasm(0);
@@ -46,9 +41,9 @@ runWasm(0);
 
 // Sends the players move to the server if it is their turn
 function players_move(choice_num){
-  if (game_id != null && jsonGame.current_player == player_num){
+  if (game_id != null && jsonGame.current_player == current_player){
     if(update_board(choice_num)){
-      socket.emit('players_choice', {player_id: player_id, game_id: game_id, choice : choice_num});
+      socket.emit('players_choice', {game_id: game_id, choice : choice_num});
       document.getElementById("current_player").innerHTML = "Opponents turn";
       document.getElementById("timer").classList.add("invis");
       clear_timeouts();
@@ -109,7 +104,7 @@ function game_over(){
     document.getElementById(winner_text_id).innerHTML = "You Won via Timeout";
   } else if (jsonGame.winner == -4){
     document.getElementById(winner_text_id).innerHTML = "You Lost via Timeout";
-  } else if (jsonGame.winner == player_num){
+  } else if (jsonGame.winner == current_player){
     document.getElementById(winner_text_id).innerHTML = "You Won";
   } else{
     document.getElementById(winner_text_id).innerHTML = "Your Opponent Won";
@@ -122,7 +117,7 @@ function game_over(){
 // Resets the game for the user and waits for a new match
 function new_match(){
   if (jsonGame.winner != 0){
-    socket.emit('new_opponent', {game_id: game_id, player_id: player_id});
+    socket.emit('new_opponent', {game_id: game_id});
     document.getElementById("current_player").innerHTML = "Searching for opponent..."
 
     document.getElementById("player_info").classList.remove("invis");
@@ -131,7 +126,7 @@ function new_match(){
     document.getElementById("rematch_button").style.display = "inline";
 
     game_id = null;
-    player_num = null;
+    current_player = null;
     clear_game();
     runWasm();
   }      
@@ -141,7 +136,7 @@ function new_match(){
 function rematch_request(){
   if (jsonGame.winner != 0){
     if (rematch_sent == false){
-      socket.emit('rematch', {player_id: player_id, game_id: game_id});
+      socket.emit('rematch', {game_id: game_id});
       rematch_sent = true;
       rematch_num += 1;
       document.getElementById("rematch_button").innerHTML = "Rematch (" + rematch_num + ")";
@@ -164,7 +159,7 @@ function start_rematch(){
   player_swap();
   runWasm(jsonGame.current_player);
 
-  if (jsonGame.current_player == player_num){
+  if (jsonGame.current_player == current_player){
     document.getElementById("current_player").innerHTML = "Your turn";
     document.getElementById("timer").innerHTML = move_time_limit;
     document.getElementById("timer").classList.remove("invis");
@@ -201,7 +196,7 @@ function move_timer(){
 
 function player_timeout(){
   if (jsonGame.winner == 0){
-    socket.emit('timeout', {player_id: player_id, game_id: game_id});
+    socket.emit('timeout', {game_id: game_id});
     jsonGame.winner = -4;
     game_over();
   }
@@ -219,10 +214,9 @@ function clear_timeouts(){
 // Prints the status of the game 
 function game_status(){
   console.log("Game Status:");
-  console.log("Player ID: " + player_id);
   console.log("Current Game: " + game_id);
   console.log("Current Player: " + jsonGame.current_player);
-  console.log("Player num: " + player_num);
+  console.log("Player num: " + current_player);
 }
 
 
@@ -245,15 +239,11 @@ window.rematch = () => {
 
 /********** Socket functions -- Interactions with the server **********/
 
-socket.on('new_player_id', (data) => {
-  sessionStorage.setItem("player_id", data.player_id);
-});
-
 socket.on('new_game', (data) => {
   game_id = data.game_id;
-  player_num = data.start_player;
-  jsonGame.current_player = 1;
-  // Sets oppopnent id and sets current player
+  current_player = data.start_player;
+  jsonGame.current_player = data.start_player;
+  // Sets the game state based on the start player
   if (data.start_player == 1){
     document.getElementById("current_player").innerHTML = "Your turn";
     document.getElementById("timer").innerHTML = move_time_limit;
@@ -263,12 +253,12 @@ socket.on('new_game', (data) => {
     document.getElementById("current_player").innerHTML = "Opponents turn";
     document.getElementById("timer").classList.add("invis");
   }
-  //console.log("Game start");
-  //game_status();
+  console.log("Game start");
+  game_status();
 });
 
 socket.on('opponents_move', (data) => {
-  if(jsonGame.current_player != player_num){
+  if(jsonGame.current_player != current_player){
     update_board(data.choice);
     if (jsonGame.winner == 0){
       document.getElementById("current_player").innerHTML = "Your turn";
@@ -290,7 +280,7 @@ socket.on('opponent_rematch', () => {
 socket.on('opponent_disconnect', () => {
   document.getElementById("rematch_button").style.display = "none";
 
-  // Checks if they forfieted the game
+  // Checks if they forfeited the game
   if (jsonGame.winner == 0){
     jsonGame.winner = -2;
     game_over();

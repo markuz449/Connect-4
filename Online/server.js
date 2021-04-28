@@ -1,28 +1,16 @@
 var express = require("express");
-var bodyParser = require("body-parser");
 var errorHandler = require("errorhandler");
-var {v4: uuidv4 }  = require("uuid");
+var {v4: uuid }  = require("uuid");
 var path = require("path");
 var {transports, createLogger, format} = require('winston');
-const { Console } = require("console");
 
 var app = express();
 var root = path.join(__dirname + "/public");
 
-var current_players = [];
 var current_games = [];
+var public_players = [];
 var private_join_codes = [];
 var private_players = [];
-
-// Setting timers
-var game_timer = setInterval(start_game, 3000);
-var online_num_update_timer = setInterval(update_online_num, 3000);
-
-// Parse application/json and application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-app.use(bodyParser.json());
 
 // Simple Winston logger
 const logger = createLogger({
@@ -57,17 +45,11 @@ const io = require("socket.io")(server);
 io.on('connection', (socket) => {
   logger.info({message: ("Socket: " + socket.id + " connected")});
 
-  // Listens for when player requests a player_id
-  socket.on('generate_player_id', () => {
-    socket.emit('new_player_id', {player_id: uuidv4()});
-  });
-
-  // Listens for when the player connects
-  socket.on('player_connect', (data) => {
-    logger.info({message:('New player connected: ' + data.player_id)});
-    var new_player = {socket_id: socket.id, player_id: data.player_id, game_id: null};
-    current_players.push(new_player);
-    logger.info({message:("Current Players: " + current_players.length)});
+  // Listens for when player wants to join the public queue
+  socket.on('add_to_public_queue', () => {
+    logger.info({message:('Adding new player to public queue: ' + socket.id)});
+    public_players.push(socket.id);
+    logger.info({message:("Current Players: " + public_players.length)});
   });
 
   // Listens if a player disconnects
@@ -78,8 +60,11 @@ io.on('connection', (socket) => {
     var private_socket_index = get_private_socket_index(socket.id);
 
     // Disconnects from Public
+    if (public_players.includes(socket.id)){
+      console.log("Public players does contain the socket.id");
+    }
     if (public_socket_index > -1) {
-      var disconnecting_player = current_players[public_socket_index];
+      var disconnecting_player = public_players[public_socket_index];
       
       // Remove player from game and sends opponent disconnect
       if (disconnecting_player.game_id != null){
@@ -109,16 +94,16 @@ io.on('connection', (socket) => {
       }
 
       // Remove the player from the player list
-      current_players.splice(public_socket_index, 1);
+      public_players.splice(public_socket_index, 1);
     } 
 
     // Disconnects from Private
     if (private_socket_index > -1){
       // Check players gameId
       // If null remove them n code
-      // If not, send opponent mesage
+      // If not, send opponent message
       // Remove the player but keep code
-      // updateu the game player list... yu know what it is
+      // update the game player list... yu know what it is
       // If both null then remove code
       console.log("Private Players: " + private_players);
       console.log("Private Codes: " + private_join_codes);
@@ -195,13 +180,13 @@ io.on('connection', (socket) => {
   socket.on('new_opponent', (data) => {
     logger.info({message:("New Opponent: Player ID: " + data.player_id)});
     var player_index = get_player_index(data.player_id);
-    current_players[player_index].game_id = null;
+    public_players[player_index].game_id = null;
 
     var game_index = get_game_index(data.game_id);
     var player1 = current_games[game_index].player1;
     var player2 = current_games[game_index].player2;
 
-    // Sets players refrence in game to null and sends disconnect to opponent
+    // Sets players reference in game to null and sends disconnect to opponent
     if (player1.player_id == data.player_id){
       player1.game_id = null;
       if (player2.game_id != null){
@@ -229,7 +214,7 @@ io.on('connection', (socket) => {
       var player1 = current_games[game_index].player1;
       var player2 = current_games[game_index].player2;
 
-      // Sets players refrence in game to null and sends disconnect to opponent
+      // Sets players reference in game to null and sends disconnect to opponent
       if (player1.player_id == data.player_id){
         io.to(player2.socket_id).emit('opponent_rematch');
       } else{
@@ -258,7 +243,7 @@ io.on('connection', (socket) => {
   // Listens if user wants to host a private game
   socket.on('host_game', (data) => {
     logger.info({message: "Player: " + data.player_id + " Hosting Game"});
-    var join_code = uuidv4();
+    var join_code = uuid();
     join_code = join_code.substring(0, 5);
     private_join_codes.push(join_code);
 
@@ -280,7 +265,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('start_private_game', (data) => {
-    var game_id = uuidv4();
+    var game_id = uuid();
     var join_code = data.join_code;
     logger.info({message:("Starting New Private Game: " + game_id)});
 
@@ -312,31 +297,33 @@ io.on('connection', (socket) => {
   });
 });
 
+/*** Socket managing functions ***/
+
 /*** Timed Functions that get called every 3 seconds ***/
 // Checks if a game should start
 function start_game(){
   // Generates a new game between two different players
-  if (current_players.length > 1){
-    var avaliable_players = []; 
-    for (let i = 0; i < current_players.length; i++){
-      if (current_players[i].game_id == null){
-        avaliable_players.push(current_players[i]);
+  if (public_players.length > 1){
+    var available_players = []; 
+    for (let i = 0; i < public_players.length; i++){
+      if (public_players[i].game_id == null){
+        available_players.push(public_players[i]);
       }
     }
-    if (avaliable_players.length > 1){
-      var game_id = uuidv4();
+    if (available_players.length > 1){
+      var game_id = uuid();
       logger.info({message:("Starting New Public Game: " + game_id)});
-      var player1 = avaliable_players[0];
-      var player2 = avaliable_players[1];
+      var player1 = available_players[0];
+      var player2 = available_players[1];
       var player_start = Math.round(Math.random());
 
       var new_game = {game_id: game_id, player1: player1, player2: player2};
       current_games.push(new_game);
 
       // Updates the players to be in a game
-      for (let i = 0; i < current_players.length; i++){
-        if (current_players[i].player_id == player1.player_id || current_players[i].player_id == player2.player_id){
-          current_players[i].game_id = game_id;
+      for (let i = 0; i < public_players.length; i++){
+        if (public_players[i].player_id == player1.player_id || public_players[i].player_id == player2.player_id){
+          public_players[i].game_id = game_id;
         }
       }
 
@@ -353,12 +340,11 @@ function start_game(){
 
 // Sends through the number of current online players
 function update_online_num(){
-  io.sockets.emit('update_online_num', {online_num: current_players.length});
+  io.sockets.emit('update_online_num', {online_num: public_players.length});
 }
 
 
 /*** Supporting functions ***/
-
 // Gets the games index from a given Game ID
 function get_game_index(game_id){
   var game_index = -1;
@@ -377,28 +363,13 @@ function get_game_index(game_id){
 // Gets the public players index from a given Socket ID
 function get_socket_index(socket_id){
   var socket_index = -1;
-  for (let i = 0; i < current_players.length; i++){
-    if ((current_players[i].socket_id == socket_id) && (current_players[i].player_id != null)){
+  for (let i = 0; i < public_players.length; i++){
+    if ((public_players[i].socket_id == socket_id) && (public_players[i].player_id != null)){
       socket_index = i;
       break;
     }
   }
   return socket_index;
-}
-
-// Gets the public players index from a given Player ID
-function get_player_index(player_id){
-  var player_index = -1;
-  for (let i = 0; i < current_players.length; i++){
-    if (current_players[i].player_id == player_id){
-      player_index = i;
-      break;
-    }
-  }
-  if (player_index == -1){
-    logger.error({message:("Error in getting player-index")});
-  }
-  return player_index;
 }
 
 // Gets the private players index from a given Socket ID
@@ -411,14 +382,4 @@ function get_private_socket_index(socket_id){
     }
   }
   return socket_index;
-}
-
-function join_code_num(join_code){
-  var code_num = 0;
-  for (let i = 0; i < private_players.length; i++){
-    if (private_players[i].join_code == join_code){
-      code_num++;
-    }
-  }
-  return code_num;
 }
