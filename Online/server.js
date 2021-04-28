@@ -12,6 +12,10 @@ var public_players = [];
 var private_join_codes = [];
 var private_players = [];
 
+// Setting timers
+var game_timer = setInterval(start_game, 3000);
+var online_num_update_timer = setInterval(update_online_num, 3000);
+
 // Simple Winston logger
 const logger = createLogger({
   format: format.combine(
@@ -48,7 +52,9 @@ io.on('connection', (socket) => {
   // Listens for when player wants to join the public queue
   socket.on('add_to_public_queue', () => {
     logger.info({message:('Adding new player to public queue: ' + socket.id)});
-    public_players.push(socket.id);
+    var new_player = {socket_id: socket.id, game_id: null};
+    console.log("Connected: " + socket.id);
+    public_players.push(new_player);
     logger.info({message:("Current Players: " + public_players.length)});
   });
 
@@ -56,106 +62,17 @@ io.on('connection', (socket) => {
   // Checks if they were in a game or not, if so, tell the opponent that they forfeited
   socket.on('disconnect', () => {
     logger.info({message:("Socket: " + socket.id + " disconnecting")});
-    var public_socket_index = get_socket_index(socket.id);
+    var public_socket_index = get_public_socket_index(socket.id);
     var private_socket_index = get_private_socket_index(socket.id);
 
     // Disconnects from Public
-    if (public_players.includes(socket.id)){
-      console.log("Public players does contain the socket.id");
-    }
     if (public_socket_index > -1) {
-      var disconnecting_player = public_players[public_socket_index];
-      
-      // Remove player from game and sends opponent disconnect
-      if (disconnecting_player.game_id != null){
-        var game_index = get_game_index(disconnecting_player.game_id);
-        var disconnecting_game = current_games[game_index];
-        var player1 = disconnecting_game.player1;
-        var player2 = disconnecting_game.player2;
-
-        logger.info({message:("Disconnecting from public game: " + disconnecting_game.game_id)});
-        if(player1.player_id == disconnecting_player.player_id){
-          io.to(player2.socket_id).emit('opponent_disconnect');
-          player1.game_id = null;
-        } 
-        else if(player2.player_id == disconnecting_player.player_id){
-          io.to(player1.socket_id).emit('opponent_disconnect');
-          player2.game_id = null;
-        }
-        else {
-          logger.error({message:("Error in removing player from public game while disconnecting")});
-        }
-
-        // Checks if the game needs to be removed
-        if (player1.game_id == null && player2.game_id == null){
-          current_games.splice(game_index, 1);
-          logger.info({message:("Removed a game via disconnect, current list: " + current_games)});
-        }
-      }
-
-      // Remove the player from the player list
-      public_players.splice(public_socket_index, 1);
+      disconnect_public_player(public_socket_index);
     } 
 
     // Disconnects from Private
-    if (private_socket_index > -1){
-      // Check players gameId
-      // If null remove them n code
-      // If not, send opponent message
-      // Remove the player but keep code
-      // update the game player list... yu know what it is
-      // If both null then remove code
-      console.log("Private Players: " + private_players);
-      console.log("Private Codes: " + private_join_codes);
-
-      var disconnecting_player = private_players[private_socket_index];
-      console.log("Disconnecting player: " + disconnecting_player.player_id);
-      console.log("Socket 1: " + disconnecting_player.socket_id + ", Socket 2: " + socket.id);
-      console.log("Game ID: " + disconnecting_player.game_id);
-
-      if (disconnecting_player.game_id != null){
-        var game_index = get_game_index(disconnecting_player.game_id);
-        var disconnecting_game = current_games[game_index];
-        var player1 = disconnecting_game.player1;
-        var player2 = disconnecting_game.player2;
-
-        logger.info({message:("Disconnecting from private game: " + disconnecting_game.game_id)});
-        if(player1.player_id == disconnecting_player.player_id){
-          io.to(player2.socket_id).emit('opponent_disconnect');
-          player1.game_id = null;
-        } 
-        else if(player2.player_id == disconnecting_player.player_id){
-          io.to(player1.socket_id).emit('opponent_disconnect');
-          player2.game_id = null;
-        }
-        else {
-          logger.error({message:("Error in removing player from public game while disconnecting")});
-        }
-
-        // Checks if the game needs to be removed and join code
-        if (player1.game_id == null && player2.game_id == null){
-          console.log("Private Codes: " + private_join_codes);
-          console.log("Removing Game and Join Code");
-          current_games.splice(game_index, 1);
-          private_join_codes.splice(private_join_codes.indexOf(disconnecting_player.join_code), 1);
-          logger.info({message:("Removed a game via disconnect, current list: " + current_games)});
-          logger.info({message:("Removed a join code via disconnect, current list: " + private_join_codes)});
-        } 
-        else{
-          // Adds the join code back to the list so friend can join again if accidental disconnect
-          private_join_codes.push(disconnecting_player.join_code);
-        }
-      } 
-      else{
-        // Removes unused join code
-        private_join_codes.splice(private_join_codes.indexOf(disconnecting_player.join_code), 1);
-      }
-
-      // Remove player from private list
-      private_players.splice(private_socket_index, 1);
-
-      console.log("Private Players: " + private_players);
-      console.log("Private Codes: " + private_join_codes);
+    else if (private_socket_index > -1){
+      disconnect_private_player(private_socket_index);
     }
   });
 
@@ -297,7 +214,103 @@ io.on('connection', (socket) => {
   });
 });
 
+
 /*** Socket managing functions ***/
+// Removing a player from a public game
+function disconnect_public_player(public_socket_index){
+  var disconnecting_player = public_players[public_socket_index];
+  
+  // Remove player from game and sends opponent disconnect
+  if (disconnecting_player.game_id != null){
+    var game_index = get_game_index(disconnecting_player.game_id);
+    var disconnecting_game = current_games[game_index];
+    var player1 = disconnecting_game.player1;
+    var player2 = disconnecting_game.player2;
+
+    logger.info({message:("Disconnecting from public game: " + disconnecting_game.game_id)});
+    if(player1.socket_id == disconnecting_player.socket_id){
+      io.to(player2.socket_id).emit('opponent_disconnect');
+      player1.game_id = null;
+    } 
+    else if(player2.socket_id == disconnecting_player.socket_id){
+      io.to(player1.socket_id).emit('opponent_disconnect');
+      player2.game_id = null;
+    }
+    else {
+      logger.error({message:("Error in removing player from public game while disconnecting")});
+    }
+
+    // Checks if the game needs to be removed
+    if (player1.game_id == null && player2.game_id == null){
+      current_games.splice(game_index, 1);
+      logger.info({message:("Removed a game via disconnect, current list: " + current_games)});
+    }
+  }
+  // Remove the player from the player list
+  public_players.splice(public_socket_index, 1);
+}
+
+// Removes a player from a private game
+function disconnect_private_player(private_socket_index){
+  // Check players gameId
+  // If null remove them n code
+  // If not, send opponent message
+  // Remove the player but keep code
+  // update the game player list... yu know what it is
+  // If both null then remove code
+  console.log("Private Players: " + private_players);
+  console.log("Private Codes: " + private_join_codes);
+
+  var disconnecting_player = private_players[private_socket_index];
+  console.log("Disconnecting player: " + disconnecting_player.player_id);
+  console.log("Socket 1: " + disconnecting_player.socket_id + ", Socket 2: " + socket.id);
+  console.log("Game ID: " + disconnecting_player.game_id);
+
+  if (disconnecting_player.game_id != null){
+    var game_index = get_game_index(disconnecting_player.game_id);
+    var disconnecting_game = current_games[game_index];
+    var player1 = disconnecting_game.player1;
+    var player2 = disconnecting_game.player2;
+
+    logger.info({message:("Disconnecting from private game: " + disconnecting_game.game_id)});
+    if(player1.player_id == disconnecting_player.player_id){
+      io.to(player2.socket_id).emit('opponent_disconnect');
+      player1.game_id = null;
+    } 
+    else if(player2.player_id == disconnecting_player.player_id){
+      io.to(player1.socket_id).emit('opponent_disconnect');
+      player2.game_id = null;
+    }
+    else {
+      logger.error({message:("Error in removing player from public game while disconnecting")});
+    }
+
+    // Checks if the game needs to be removed and join code
+    if (player1.game_id == null && player2.game_id == null){
+      console.log("Private Codes: " + private_join_codes);
+      console.log("Removing Game and Join Code");
+      current_games.splice(game_index, 1);
+      private_join_codes.splice(private_join_codes.indexOf(disconnecting_player.join_code), 1);
+      logger.info({message:("Removed a game via disconnect, current list: " + current_games)});
+      logger.info({message:("Removed a join code via disconnect, current list: " + private_join_codes)});
+    } 
+    else{
+      // Adds the join code back to the list so friend can join again if accidental disconnect
+      private_join_codes.push(disconnecting_player.join_code);
+    }
+  } 
+  else{
+    // Removes unused join code
+    private_join_codes.splice(private_join_codes.indexOf(disconnecting_player.join_code), 1);
+  }
+
+  // Remove player from private list
+  private_players.splice(private_socket_index, 1);
+
+  console.log("Private Players: " + private_players);
+  console.log("Private Codes: " + private_join_codes);
+}
+
 
 /*** Timed Functions that get called every 3 seconds ***/
 // Checks if a game should start
@@ -361,15 +374,13 @@ function get_game_index(game_id){
 }
 
 // Gets the public players index from a given Socket ID
-function get_socket_index(socket_id){
-  var socket_index = -1;
-  for (let i = 0; i < public_players.length; i++){
-    if ((public_players[i].socket_id == socket_id) && (public_players[i].player_id != null)){
-      socket_index = i;
-      break;
+function get_public_socket_index(socket_id){
+  for (let socket_index = 0; socket_index < public_players.length; socket_index++){
+    if (public_players[socket_index].socket_id == socket_id){
+      return socket_index;
     }
   }
-  return socket_index;
+  return -1;
 }
 
 // Gets the private players index from a given Socket ID
