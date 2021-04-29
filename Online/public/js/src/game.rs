@@ -1,12 +1,10 @@
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
- 
+
 /// This is the main structure of the game. 
 /// The game struct holds all of the important data that the game needs.
 /// The structure holds the current board, the winner status, who the current player is, and, 
-/// the refreneces to the player's choice function.
-/// 
-/// 
+/// the references to the player's choice function
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Game{
     pub board: Vec<Vec<usize>>,
@@ -48,7 +46,7 @@ impl Game{
     /// let player2 = AI::AI_turn;
     /// ```
     /// 
-    /// Fnally the game is created and returned
+    /// Finally the game is created and returned
     /// 
     /// # Example
     /// 
@@ -99,7 +97,7 @@ impl Game{
     /// It calls the token counting function checking both directions. 
     /// 
     /// For example the function counts both left and right and adds the totals together. 
-    /// If the cound is greater than 4 then the player has won
+    /// If the count is greater than 4 then the player has won
     /// 
     /// # Example 
     /// 
@@ -112,7 +110,7 @@ impl Game{
     /// }
     /// ```
     /// 
-    /// This function ckecks horizontal, vertical, and, both diagonal directions
+    /// This function checks horizontal, vertical, and, both diagonal directions
     /// 
     /// If no player has won then the program also checks the top row of the game to see if they are filled. 
     /// If so, then the game is a draw. 
@@ -125,21 +123,21 @@ impl Game{
     /// 
     pub fn board_check(&mut self, player_choice: usize, y_position: usize){
         let mut horiz_count: i8 = 0;
-        let mut verti_count: i8 = 0;
+        let mut vert_count: i8 = 0;
         let mut diag_count1: i8 = 0;
         let mut diag_count2: i8 = 0;
         
         horiz_count = horiz_count + Game::token_count(&self, player_choice, y_position,  1,  0,  0);
         horiz_count = horiz_count + Game::token_count(&self, player_choice, y_position, -1,  0, -1);
-        verti_count = verti_count + Game::token_count(&self, player_choice, y_position,  0,  1,  0);
-        verti_count = verti_count + Game::token_count(&self, player_choice, y_position,  0, -1, -1);
+        vert_count = vert_count + Game::token_count(&self, player_choice, y_position,  0,  1,  0);
+        vert_count = vert_count + Game::token_count(&self, player_choice, y_position,  0, -1, -1);
         diag_count1 = diag_count1 + Game::token_count(&self, player_choice, y_position, -1,  1,  0);
         diag_count1 = diag_count1 + Game::token_count(&self, player_choice, y_position,  1, -1, -1);
         diag_count2 = diag_count2 + Game::token_count(&self, player_choice, y_position,  1,  1,  0);
         diag_count2 = diag_count2 + Game::token_count(&self, player_choice, y_position, -1, -1, -1);
         
         // Checks to see if player has beaten the game
-        if horiz_count >= 4 || verti_count >= 4 || diag_count1 >= 4 || diag_count2 >= 4{
+        if horiz_count >= 4 || vert_count >= 4 || diag_count1 >= 4 || diag_count2 >= 4{
             self.winner = Game::to_i8(self.current_player);
         } else{
             // Checks if the game is a draw
@@ -157,9 +155,9 @@ impl Game{
 
     /// Recursive function that counts the total amount of tokens in a given line. 
     /// 
-    /// This recursize function has a lot of changing variables that are important. 
+    /// This recursive function has a lot of changing variables that are important. 
     /// 
-    /// # Arguements
+    /// # Arguments
     /// 
     /// ``` rust
     /// posX;       // This is current x position that is being checked

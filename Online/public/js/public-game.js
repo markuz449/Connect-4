@@ -217,6 +217,7 @@ function game_status(){
   console.log("Current Game: " + game_id);
   console.log("Current Player: " + jsonGame.current_player);
   console.log("Player num: " + current_player);
+  console.log("Current Board: " + jsonGame.board)
 }
 
 

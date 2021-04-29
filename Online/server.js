@@ -95,9 +95,9 @@ io.on('connection', (socket) => {
 
   // Listens if the user wants to play against a new opponent
   socket.on('new_opponent', (data) => {
-    logger.info({message:("New Opponent: Player ID: " + data.player_id)});
-    var player_index = get_player_index(data.player_id);
-    public_players[player_index].game_id = null;
+    logger.info({message:("New Opponent Request From: Player ID: " + socket.id)});
+    var socket_index = get_public_socket_index(socket.id);
+    public_players[socket_index].game_id = null;
 
     var game_index = get_game_index(data.game_id);
     var player1 = current_games[game_index].player1;
@@ -119,20 +119,20 @@ io.on('connection', (socket) => {
     // If both players have left, remove the game from the list
     if (player1.game_id == null && player2.game_id == null){
       current_games.splice(game_index, 1);
-      logger.info({message:("Removed a game via play_again(), current list: " + current_games)});
+      logger.info({message:("Removed a game via new_opponent(), current list: " + current_games)});
     }
   });
 
   // Listens if the player wants a rematch
   socket.on('rematch', (data) => {
-    logger.info({message:("Rematch request: Player ID: " + data.player_id)});
+    logger.info({message:("Rematch request: Socket ID: " + socket.id)});
     var game_index = get_game_index(data.game_id);
     if (game_index >= 0){
       var player1 = current_games[game_index].player1;
       var player2 = current_games[game_index].player2;
 
       // Sets players reference in game to null and sends disconnect to opponent
-      if (player1.player_id == data.player_id){
+      if (player1.socket_id == socket.id){
         io.to(player2.socket_id).emit('opponent_rematch');
       } else{
         io.to(player1.socket_id).emit('opponent_rematch');
@@ -142,14 +142,14 @@ io.on('connection', (socket) => {
   
   // Listens if the opponent doesn't make a move in time
   socket.on('timeout', (data) => {
-    logger.info({message:("Timeout from: " + data.player_id)});
+    logger.info({message:("Timeout from: " + socket.id)});
     var game_index = get_game_index(data.game_id);
     if (game_index >= 0){
 
       var player1 = current_games[game_index].player1;
       var player2 = current_games[game_index].player2;
 
-      if (player1.player_id == data.player_id){
+      if (player1.socket_id == socket.id){
         io.to(player2.socket_id).emit('timeout_win');
       } else{
         io.to(player1.socket_id).emit('timeout_win');
@@ -335,7 +335,7 @@ function start_game(){
 
       // Updates the players to be in a game
       for (let i = 0; i < public_players.length; i++){
-        if (public_players[i].player_id == player1.player_id || public_players[i].player_id == player2.player_id){
+        if (public_players[i].socket_id == socket.id){
           public_players[i].game_id = game_id;
         }
       }
