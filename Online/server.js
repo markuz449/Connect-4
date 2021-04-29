@@ -23,7 +23,7 @@ const logger = createLogger({
       format.json()
   ),
   transports: [
-      //new transports.Console(),
+      new transports.Console(),
       new transports.File({filename: 'logs/Connect-4.log', level:'info'})
   ]
 });
@@ -53,7 +53,6 @@ io.on('connection', (socket) => {
   socket.on('add_to_public_queue', () => {
     logger.info({message:('Adding new player to public queue: ' + socket.id)});
     var new_player = {socket_id: socket.id, game_id: null};
-    console.log("Connected: " + socket.id);
     public_players.push(new_player);
     logger.info({message:("Current Players: " + public_players.length)});
   });
@@ -83,7 +82,7 @@ io.on('connection', (socket) => {
       var player1 = current_games[game_index].player1;
       var player2 = current_games[game_index].player2;
 
-      if (player1.player_id == data.player_id){
+      if (player1.socket_id == socket.id){
         io.to(player2.socket_id).emit('opponents_move', {choice: data.choice});
       } else{
         io.to(player1.socket_id).emit('opponents_move', {choice: data.choice});
@@ -100,26 +99,28 @@ io.on('connection', (socket) => {
     public_players[socket_index].game_id = null;
 
     var game_index = get_game_index(data.game_id);
-    var player1 = current_games[game_index].player1;
-    var player2 = current_games[game_index].player2;
+    if (game_index > -1 ){
+      var player1 = current_games[game_index].player1;
+      var player2 = current_games[game_index].player2;
 
-    // Sets players reference in game to null and sends disconnect to opponent
-    if (player1.player_id == data.player_id){
-      player1.game_id = null;
-      if (player2.game_id != null){
-        io.to(player2.socket_id).emit('opponent_disconnect');
+      // Sets players reference in game to null and sends disconnect to opponent
+      if (player1.socket_id == socket.id){
+        player1.game_id = null;
+        if (player2.game_id != null){
+          io.to(player2.socket_id).emit('opponent_disconnect');
+        }
+      } else{
+        player2.game_id = null;
+        if (player1.game_id != null){
+          io.to(player1.socket_id).emit('opponent_disconnect');
+        }
       }
-    } else{
-      player2.game_id = null;
-      if (player1.game_id != null){
-        io.to(player1.socket_id).emit('opponent_disconnect');
-      }
-    }
 
-    // If both players have left, remove the game from the list
-    if (player1.game_id == null && player2.game_id == null){
-      current_games.splice(game_index, 1);
-      logger.info({message:("Removed a game via new_opponent(), current list: " + current_games)});
+      // If both players have left, remove the game from the list
+      if (player1.game_id == null && player2.game_id == null){
+        current_games.splice(game_index, 1);
+        logger.info({message:("Removed a game via new_opponent(), current list: " + current_games)});
+      }
     }
   });
 
@@ -335,17 +336,17 @@ function start_game(){
 
       // Updates the players to be in a game
       for (let i = 0; i < public_players.length; i++){
-        if (public_players[i].socket_id == socket.id){
+        if (public_players[i].socket_id == player1.socket_id || public_players[i].player_id == player2.socket_id){
           public_players[i].game_id = game_id;
         }
       }
 
       if (player_start == 1){
-        io.to(player1.socket_id).emit('new_game', {game_id: game_id, start_player: 1})
-        io.to(player2.socket_id).emit('new_game', {game_id: game_id, start_player: 2})
+        io.to(player1.socket_id).emit('new_game', {game_id: game_id, player_num: 1, start_player: 1})
+        io.to(player2.socket_id).emit('new_game', {game_id: game_id, player_num: 2, start_player: 1})
       } else{
-        io.to(player1.socket_id).emit('new_game', {game_id: game_id, start_player: 2})
-        io.to(player2.socket_id).emit('new_game', {game_id: game_id, start_player: 1})
+        io.to(player1.socket_id).emit('new_game', {game_id: game_id, player_num: 1, start_player: 2})
+        io.to(player2.socket_id).emit('new_game', {game_id: game_id, player_num: 2, start_player: 2})
       }
     }
   }
@@ -360,17 +361,13 @@ function update_online_num(){
 /*** Supporting functions ***/
 // Gets the games index from a given Game ID
 function get_game_index(game_id){
-  var game_index = -1;
-  for (let i = 0; i < current_games.length; i++){
-    if (current_games[i].game_id == game_id){
-      game_index = i;
-      break;
+  for (let game_index = 0; game_index < current_games.length; game_index++){
+    if (current_games[game_index].game_id == game_id){
+      return game_index;
     }
   }
-  if (game_index == -1){
-    logger.error({message:("Error in getting game-index")});
-  }
-  return game_index;
+  logger.error({message:("Error in getting game-index")});
+  return -1;
 }
 
 // Gets the public players index from a given Socket ID
